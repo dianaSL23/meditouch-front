@@ -1,9 +1,9 @@
-import { Menu, Button } from "antd";
+import { Menu } from "antd";
 import { EncryptStorage } from "encrypt-storage";
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import logo from "../../assets/images/logo.png";
-import Logout from "../../icons/Logout";
+import logo from "../../assets/images/healthcare.png";
+import { useTranslation } from "react-i18next";
 
 function Sidenav({ color }) {
   const { pathname } = useLocation();
@@ -11,6 +11,7 @@ function Sidenav({ color }) {
   const encryptStorage1 = new EncryptStorage("secret-key", {
     prefix: "@instance1",
   });
+  const [t, i18n] = useTranslation();
   const navigate = useNavigate();
   function handleLogout() {
     encryptStorage1.removeItem("meditouch_user");
@@ -150,9 +151,13 @@ function Sidenav({ color }) {
 
   return (
     <>
-      <div className="brand">
+      <div className="brand d-flex align-items-center">
         <NavLink to="/">
-          <img src={logo} alt="" />
+          <img src={logo} alt="" style={{
+            filter: "invert(51%) sepia(26%) saturate(7287%) hue-rotate(190deg) brightness(98%) contrast(108%)"
+          }} 
+          className="me-2"
+          />
         </NavLink>
         <span>MediTouch Dashboard</span>
       </div>
@@ -168,7 +173,7 @@ function Sidenav({ color }) {
             >
               {dashboard}
             </span>
-            <span className="label">Dashboard</span>
+            <span className="label"> {t("dashboard")}</span>
           </NavLink>
         </Menu.Item>
         {userData.userInfo?.userRole !== "ADMIN" && (
@@ -182,7 +187,7 @@ function Sidenav({ color }) {
               >
                 {tables}
               </span>
-              <span className="label">Appointments</span>
+              <span className="label">{t("appointments")}</span>
             </NavLink>
           </Menu.Item>
         )}
@@ -197,38 +202,10 @@ function Sidenav({ color }) {
             >
               {billing}
             </span>
-            <span className="label">Community Posts</span>
+            <span className="label">{t("community_posts")}</span>
           </NavLink>
         </Menu.Item>
-        {userData.userInfo?.userRole === "ADMIN" && (
-          <Menu.Item key="3">
-            <NavLink to="/Messages">
-              <span
-                className="icon"
-                style={{
-                  background: page === "messages" ? color : "",
-                }}
-              >
-                {billing}
-              </span>
-              <span className="label">Messages</span>
-            </NavLink>
-          </Menu.Item>
-        )}
-
-        {/* <Menu.Item key="4">
-          <NavLink to="/rtl">
-            <span
-              className="icon"
-              style={{
-                background: page === "rtl" ? color : "",
-              }}
-            >
-              {rtl}
-            </span>
-            <span className="label">RTL</span>
-          </NavLink>
-        </Menu.Item> */}
+    
         {userData.userInfo?.userRole === "HEALTH_PROFESSIONAL" && (
           <Menu.Item key="4">
             <NavLink to="/patients">
@@ -240,7 +217,7 @@ function Sidenav({ color }) {
               >
                 {rtl}
               </span>
-              <span className="label">Patients</span>
+              <span className="label">{t("patients")}</span>
             </NavLink>
           </Menu.Item>
         )}
@@ -258,14 +235,14 @@ function Sidenav({ color }) {
               >
                 {rtl}
               </span>
-              <span className="label">Referrals</span>
+              <span className="label">{t("Referrals")}</span>
             </NavLink>
           </Menu.Item>
         )}
 
         {userData.userInfo?.userRole !== "ADMIN" && (
           <Menu.Item className="menu-item-header" key="5">
-            Account Settings
+           {t("account_settings")}
           </Menu.Item>
         )}
         {userData.userInfo?.userRole !== "ADMIN" && (
@@ -285,7 +262,7 @@ function Sidenav({ color }) {
               >
                 {profile}
               </span>
-              <span className="label">Profile</span>
+              <span className="label">{t("profile")}</span>
             </NavLink>
           </Menu.Item>
         )}
@@ -293,7 +270,7 @@ function Sidenav({ color }) {
           <Menu.Item key="7">
             <NavLink to="/reservation-slots">
               <span className="icon">{signin}</span>
-              <span className="label">Reservation Slots</span>
+              <span className="label">{t("reservation_slots")}</span>
             </NavLink>
           </Menu.Item>
         )}
@@ -302,17 +279,17 @@ function Sidenav({ color }) {
           <Menu.Item key="7">
             <NavLink to="/schedule">
               <span className="icon">{signin}</span>
-              <span className="label">Schedule</span>
+              <span className="label">{t("schedule")}</span>
             </NavLink>
           </Menu.Item>
         )}
-
+  {userData.userInfo?.userRole === "HEALTH_PROFESSIONAL" && (
+          <Menu.Item key="9">
         <Menu.Item className="menu-item-header" key="8">
-          Live Settings
+        {t("live_settings")}
         </Menu.Item>
 
-        {userData.userInfo?.userRole === "HEALTH_PROFESSIONAL" && (
-          <Menu.Item key="9">
+      
             <NavLink to="/live-clinic">
               <span
                 className="icon"
@@ -322,7 +299,7 @@ function Sidenav({ color }) {
               >
                 {profile}
               </span>
-              <span className="label">Live Clinic</span>
+              <span className="label">{t("live_clinic")}</span>
             </NavLink>
           </Menu.Item>
         )}
@@ -330,7 +307,7 @@ function Sidenav({ color }) {
         <Menu.Item key="12" onClick={handleLogout}>
           <NavLink>
             <span className="icon">{logout}</span>
-            <span className="label">Logout</span>
+            <span className="label">{t("logout")}</span>
           </NavLink>
         </Menu.Item>
       </Menu>

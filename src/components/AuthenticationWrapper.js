@@ -1,18 +1,18 @@
 import { Spin } from "antd";
 import { EncryptStorage } from "encrypt-storage";
 import { useEffect, useState } from "react";
+import { useTranslation } from "react-i18next";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
 import { userController } from "../controllers/userController";
 
 export default function AuthenticationWrapper({ children }) {
-  const navigate = useNavigate();
   const userData = useSelector((state) => state);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(true);
   const encryptStorage1 = new EncryptStorage("secret-key", {
     prefix: "@instance1",
   });
+  const [t, i18n] = useTranslation();
 
   useEffect(() => {
     let user = encryptStorage1.getItem("meditouch_user");
@@ -26,6 +26,11 @@ export default function AuthenticationWrapper({ children }) {
             dispatch({
               type: "SET_USER_INFO",
               userInfo: userInfo,
+            });
+            userInfo.userLanguage = response.data.user.userLanguage;
+            encryptStorage1.setItem("meditouch_user", {
+              userInfo: userInfo,
+              businessAccountInfo: user.businessAccountInfo,
             });
           })
           .then(() => {
@@ -94,5 +99,11 @@ export default function AuthenticationWrapper({ children }) {
       // navigate("/sign-in");
     }
   }, []);
-  return loading ? <Spin tip="Loading...">{children}</Spin> : children;
+  return loading ? (
+    <Spin className="" tip="Loading...">
+      {children}
+    </Spin>
+  ) : (
+    children
+  );
 }

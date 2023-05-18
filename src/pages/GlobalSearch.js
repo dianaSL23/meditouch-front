@@ -1,4 +1,4 @@
-import { Button, Card, Col, Row, Slider } from "antd";
+import { Button, Card, Col, Empty, Row, Slider, Spin } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import LayoutWrapper from "../components/Layout";
@@ -9,13 +9,15 @@ import "../assets/styles/global-search.css";
 import moment from "moment";
 import { DownOutlined, UpOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
+import { useLocation } from "react-router-dom";
 export default function GlobalSearch() {
   const [searchData, setSearchData] = useState([]);
+  const state = useLocation();
   const dispatch = useDispatch();
+  const [loadingPageState, setLoadingPageState] = useState(true);
   const userData = useSelector((state) => state);
   const [loading, setLoading] = useState(false);
   const [withFavorite, setWithFavorite] = useState(false);
-  const [withFavoriteVal, setWithFavoriteVal] = useState(-1);
   const [searchText, setSearchText] = useState("");
   const [sliderPrice, setSliderPrice] = useState({
     min: 20,
@@ -54,6 +56,30 @@ export default function GlobalSearch() {
     availability: false,
   });
   const [locationEnabled, setLocationEnabled] = useState(false);
+  const loadPageState = (tempFiltersData = null) => {
+    if (state?.state) {
+      if (state.state.specialityFk) {
+        let tempFilters =
+          tempFiltersData === null ? { ...filtersData } : tempFiltersData;
+        tempFilters.specialityFk = state.state.specialityFk;
+        let tempfiltersVisibility = { ...filtersVisibility };
+        tempfiltersVisibility.specialities = true;
+        setFiltersData(tempFilters);
+        setFiltersVisibility(tempfiltersVisibility);
+        setLoadingPageState(false);
+      } else {
+        if (tempFiltersData !== null) {
+          setFiltersData(tempFiltersData);
+        }
+        setLoadingPageState(false);
+      }
+    } else {
+      if (tempFiltersData !== null) {
+        setFiltersData(tempFiltersData);
+      }
+      setLoadingPageState(false);
+    }
+  };
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.permissions
@@ -66,21 +92,22 @@ export default function GlobalSearch() {
                 let tempFilters = { ...filtersData };
                 tempFilters.myLatitude = position.coords.latitude;
                 tempFilters.myLongitude = position.coords.longitude;
-
-                setFiltersData(tempFilters);
+                loadPageState(tempFilters);
                 setLocationEnabled(true);
               },
-              (error) => {}
+              (error) => {
+                loadPageState();
+              }
             );
           } else if (result.state === "denied") {
-            //If denied then you have to show instructions to enable location
+            loadPageState();
           }
           result.onchange = function () {
-            console.log(result.state);
+            loadPageState();
           };
         });
     } else {
-      toast.warning("Sorry Not available!", {
+      toast.warning("Enable location to benifit from search by distance!", {
         position: "top-center",
         autoClose: 5000,
         hideProgressBar: true,
@@ -88,18 +115,20 @@ export default function GlobalSearch() {
         pauseOnHover: false,
         draggable: false,
       });
+      loadPageState();
     }
   }, []);
   const [loadMore, setLoadMore] = useState(paginationProps.pageNumber === -1);
   useEffect(() => {
     if (
       loadMore &&
+      !loadingPageState &&
       !userData.loadingApp &&
       paginationProps.pageNumber <= paginationProps.totalNumberOfPages
     ) {
       setLoading(true);
       let tempFilters = { ...filtersData };
-      tempFilters["date"] =  moment().format("YYYY-MM-DD");
+      tempFilters["date"] = moment().format("YYYY-MM-DD");
       if (util.isUserAuthorized()) {
         let user = util.getUser();
         tempFilters["userId"] = user.userInfo.userId;
@@ -117,6 +146,7 @@ export default function GlobalSearch() {
         })
         .then((response) => {
           let data = response.data;
+       
           setSearchData(data.data);
           let tempPaginationProps = { ...paginationProps };
           tempPaginationProps.pageNumber =
@@ -131,26 +161,9 @@ export default function GlobalSearch() {
           setLoading(false);
         });
     }
-  }, [loadMore, userData.loadingApp]);
-  useEffect(() => {
-    if (util.isUserAuthorized()) {
-      let tempSearchData = [...searchData];
-      tempSearchData = tempSearchData.filter(
-        (sd) => sd.userDetails.favoriteId !== -1
-      );
-      let tempFavorites = [];
-      for (let i = 0; i < tempSearchData.length; i++) {
-        tempFavorites.push({
-          businessAccountFk: tempSearchData[i].userDetails.businessAccountId,
-          favoriteId: tempSearchData[i].userDetails.favoriteId,
-        });
-      }
-      dispatch({
-        type: "SET_FAVORITE_DOCTORS",
-        favoriteDoctors: tempFavorites,
-      });
-    }
-  }, [searchData]);
+  }, [loadMore, userData.loadingApp, loadingPageState]);
+
+
   function updateFilters(key, value) {
     let tempFilters = { ...filtersData };
     tempFilters[key] = value;
@@ -166,6 +179,26 @@ export default function GlobalSearch() {
     tempFiltersVisibility[key] = value;
     setFiltersVisibility(tempFiltersVisibility);
   }
+  useEffect(() => {
+    if (util.isUserAuthorized()) {
+      let tempSearchData = [...searchData];
+      tempSearchData = tempSearchData.filter(
+        (sd) => sd.userDetails.favoriteId !== -1
+      );
+    
+      let tempFavorites = [];
+      for (let i = 0; i < tempSearchData.length; i++) {
+        tempFavorites.push({
+          businessAccountFk: tempSearchData[i].userDetails.businessAccountId,
+          favoriteId: tempSearchData[i].userDetails.favoriteId,
+        });
+      }
+      dispatch({
+        type: "SET_FAVORITE_DOCTORS",
+        favoriteDoctors: tempFavorites,
+      });
+    }
+  }, [searchData]);
   return (
     <LayoutWrapper withFooter={true}>
       <section
@@ -192,6 +225,7 @@ export default function GlobalSearch() {
                 (searchText.replace(/\s+/g, "") === "" &&
                   filtersData["searchText"].replace(/\s+/g, "") !== "")
               ) {
+                
                 updateFilters("searchText", searchText);
               }
             }}
@@ -222,7 +256,7 @@ export default function GlobalSearch() {
                 </div>
                 {filtersVisibility.specialities && (
                   <select
-                    defaultValue={-1}
+                    value={filtersData.specialityFk}
                     onChange={(e) =>
                       updateFilters("specialityFk", e.target.value)
                     }
@@ -513,7 +547,7 @@ export default function GlobalSearch() {
                       <input
                         type="radio"
                         name="withFavorite"
-                        onClick={() => updateFilters("isFavorite", 1)}
+                        onClick={() =>  updateFilters("isFavorite", 1)}
                       />{" "}
                       Favorite
                       <input
@@ -529,11 +563,13 @@ export default function GlobalSearch() {
             </Card>
           </Col>
           <Col xs={24} sm={24} md={18} lg={18} xl={20} className="mb-24">
-            {loading ? (
-              "loading..."
-            ) : !loading && searchData.length === 0 ? (
-              "no data"
-            ) : (
+          {loading ? (
+            <Spin tip="Loading" size="large">
+              <div className="content" />
+            </Spin>
+          ) : !loading && searchData.length === 0 ? (
+            <Empty />
+          )  : (
               <Row
                 className="rowgap-vbox"
                 gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }}

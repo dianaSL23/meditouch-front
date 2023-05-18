@@ -42,7 +42,7 @@ export default function AllHealthProfessionals({
           />
 
           <div className="avatar-info">
-            <h6 className="font-semibold m-0">
+            <h6 className="font-semibold m-0" style={{fontSize:"14px"}}>
               {healthProfessional.firstName + " " + healthProfessional.lastName}
             </h6>
           </div>

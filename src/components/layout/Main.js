@@ -8,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { EncryptStorage } from "encrypt-storage";
 import { businessAccountController } from "../../controllers/businessAccountController";
 import AuthenticationWrapper from "../AuthenticationWrapper";
+import { useTranslation } from "react-i18next";
 
 const { Header: AntHeader, Content, Sider } = Layout;
 
@@ -28,12 +29,13 @@ function Main({ children }) {
   const handleSidenavType = (type) => setSidenavType(type);
   const handleSidenavColor = (color) => setSidenavColor(color);
   const handleFixedNavbar = (type) => setFixed(type);
+  const [t, i18n] = useTranslation();
 
   let { pathname } = useLocation();
   pathname = pathname.replace("/", "");
 
   useEffect(() => {
-    if (pathname === "rtl") {
+    if (i18n.language === "en") {
       setPlacement("left");
     } else {
       setPlacement("right");
@@ -84,9 +86,10 @@ function Main({ children }) {
   return (
     <AuthenticationWrapper>
       <Layout
+    
         className={`layout-dashboard ${
           pathname === "profile" ? "layout-profile" : ""
-        } ${pathname === "rtl" ? "layout-dashboard-rtl" : ""}`}
+        } ${placement === "right" ? "layout-dashboard-rtl" : ""}`}
       >
         <Drawer
           title={false}

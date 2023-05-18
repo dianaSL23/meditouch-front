@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
 
-import { Button, Card, Col, Row, Typography } from "antd";
+import { Button, Card, Col, Empty, Row, Spin, Typography } from "antd";
 
 import Main from "../components/layout/Main";
 import { businessAccountController } from "../controllers/businessAccountController";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 export default function Patients() {
   const userData = useSelector((state) => state);
-
+  const [t, i18n] = useTranslation();
   const { Title, Text } = Typography;
 
   const [patientsData, setPatientsData] = useState([]);
@@ -48,24 +49,32 @@ export default function Patients() {
         setPatientsData(tempPatients);
       });
   }
+  const [loading, setLoading] = useState(false);
   return (
     <Main>
+          {loading ? (
+            <Spin tip="Loading" size="large">
+              <div className="content" />
+            </Spin>
+          ) : !loading && patientsData.length === 0 ? (
+            <Empty />
+          ) : ( 
       <div className="layout-content">
         <Row gutter={[24, 0]}>
           <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
             <Card bordered={false} className="criclebox cardbody ">
               <div className="project-ant">
                 <div>
-                  <div className="heading-title" level={5}>Your Patients</div>
+                  <div className="heading-title" level={5}>{t("your_patients")}</div>
                 </div>
               </div>
               <div className="ant-list-box table-responsive">
                 <table className="width-100">
                   <thead>
-                    <tr>
-                      <th >PATIENT NAME</th>
-                      <th >PATIENT EMAIL</th>
-                      <th >ACTION</th>
+                    <tr >
+                      <th >{t("patient_name")}</th>
+                      <th >{t("patient_mail")}</th>
+                      <th >{t("action")}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -82,14 +91,14 @@ export default function Patients() {
                                 onClick={() => blockUser(ap.userId, index)}
                                 danger
                               >
-                                Block User
+                               {t("block")}
                               </Button>
                             ) : (
                               <Button
                                 onClick={() => unblockUser(ap.blockId, index)}
                                 type="primary"
                               >
-                                Unblock
+                               {t("unblock")}
                               </Button>
                             )}
                           </span>
@@ -103,6 +112,7 @@ export default function Patients() {
           </Col>
         </Row>
       </div>
+           )}
     </Main>
   );
 }

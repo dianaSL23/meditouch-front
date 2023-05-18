@@ -9,7 +9,6 @@ const Messages = () => {
       setData(response.data.Messages);
     });
   }, []);
-  console.log("data",data)
   return (
     <Main>
     {Array.isArray(data) &&

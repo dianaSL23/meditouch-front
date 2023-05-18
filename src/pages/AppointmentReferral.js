@@ -1,4 +1,4 @@
-import { Button, Card, Col } from "antd";
+import { Button, Card, Col, Empty, Modal, Row } from "antd";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -6,10 +6,9 @@ import Main from "../components/layout/Main";
 import { businessAccountController } from "../controllers/businessAccountController";
 import { userController } from "../controllers/userController";
 import referralImage from "../assets/images/referralDoctor.png";
-
+import img from "../assets/images/healthcare.png";
 import BgProfile from "../assets/images/doctorProfile.jpg";
-import userImg from "../assets/images/user.png";
-import userMail from "../assets/images/mail.png";
+import { toast } from "react-toastify";
 
 export default function AppointmentReferral() {
   const { state } = useLocation();
@@ -30,7 +29,7 @@ export default function AppointmentReferral() {
           .getHealthProfessionals({
             userFk: userData.userInfo.userId,
             pageNumber: pageNumber === -1 ? 1 : pageNumber,
-            recordsByPage: 1,
+            recordsByPage: 10,
             searchText: searchText === "" ? "null" : searchText,
           })
           .then((response) => {
@@ -46,6 +45,7 @@ export default function AppointmentReferral() {
       }
     }
   }, [loadMore, userData.loadingApp]);
+
   function modifySelectedHps(hp) {
     let tempSelectedHps = [...selectedHps];
     let hpIndex = tempSelectedHps.findIndex((hps) => hps.userId === hp.userId);
@@ -56,39 +56,133 @@ export default function AppointmentReferral() {
     }
     setSelectedHps(tempSelectedHps);
   }
-  function addReferral() {
-    let referralBody = [];
-    for (let i = 0; i < selectedHps.length; i++) {
-      let json = {
-        userFk: state.appointment.currentUserId,
-        appointmentFk: state.appointment.appointmentId,
-        referralDescription: referralDescription,
-        referredByBusinessAccountFk:
-          userData.businessAccountInfo.businessAccountId,
-        referredToBusinessAccountFk: selectedHps[i].businessAccountId,
-      };
-      referralBody.push(json);
+  console.log(selectedHps)
+  const valid = () => {
+    let valid = true;
+    if (referralDescription.replace(/\s+/g, "") === "") {
+      valid = false;
+      toast.warn("please fill the referral description", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
+      });
     }
-    businessAccountController.addReferrals({ body: referralBody });
+    return valid;
+  };
+  function addReferral() {
+    if (valid()) {
+      let referralBody = [];
+      for (let i = 0; i < selectedHps.length; i++) {
+        let json = {
+          userFk: state.appointment.currentUserId,
+          appointmentFk: state.appointment.appointmentId,
+          referralDescription: referralDescription,
+          referredByBusinessAccountFk:
+            userData.businessAccountInfo.businessAccountId,
+          referredToBusinessAccountFk: selectedHps[i].businessAccountId,
+        };
+        referralBody.push(json);
+      }
+      businessAccountController.addReferrals({ body: referralBody }).then((response)=>{
+if(response && response.status===200){
+  toast.success("Referral Added successfully", {
+    position: "top-center",
+    autoClose: 5000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: false,
+    draggable: false,
+  });
+}
+      })
+    }
+    setReferralDescription("");
   }
+  console.log(hpList);
+  const [referralModel, setReferralModel] = useState(false);
+  const handlePrescriptionOk = (e) => {
+    setReferralModel(false);
+  };
+  const handlePrescriptionCancel = (e) => {
+    setReferralModel(false);
+  };
+
+  const appointmentModalUi = (
+    <Modal
+      open={referralModel}
+      // onOk={handlePrescriptionOk}
+      onCancel={handlePrescriptionCancel}
+      okButtonProps={{
+        disabled: false,
+        hidden: true,
+      }}
+      cancelButtonProps={{
+        disabled: true,
+        hidden: true,
+      }}
+    >
+      <div className="d-flex flex-column mt-2">
+      <div
+        className="d-flex align-items-center appointment-pres-wrapper 
+      justify-content-center"
+        style={{ gap: "20px" }}
+      >
+        <div>
+          <img src={img} alt="" />
+        </div>
+      </div>
+        <div className="all-txts me-2">Referral Description: </div>
+        <div className="appointment-desc-input-wrapper mt-1">
+          <textarea
+            className="appointment-info-input mt-2 pt-2"
+            type="text"
+            value={referralDescription}
+            onChange={(e) => setReferralDescription(e.target.value)}
+            placeholder="Referral Description"
+         
+          />
+        </div>
+        <div
+            style={{
+              position: "relative",
+             marginLeft:"auto",
+             marginTop:"10px"
+            }}
+        >
+          <input
+            type="button"
+            className="add-prescription-btn"
+            value="Add"
+            onClick={() => {
+              addReferral();
+              setReferralModel(false);
+            }}
+          />
+        </div>
+      </div>
+    </Modal>
+  );
+  
+
   return (
     <Main>
-      <div
-        className="profile-nav-bg"
-        style={{
-          backgroundImage: "url(" + BgProfile + ")",
-          height: "400px",
-          backgroundSize: "cover",
-        }}
-      ></div>
+      {appointmentModalUi}
       <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
-        <div className="all-txts mt-3 text-center">
+        <div className="services-txt mt-3 text-center">
           {" "}
           Please refer{" "}
           {state.appointment.firstName + " " + state.appointment.lastName} into
           another doctor
         </div>
-        <div className="d-flex mt-3 justify-content-center align-items-center">
+       
+        <div className="layout-content">
+        <Row gutter={[24, 0]}>
+          <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
+            <Card bordered={false} className="criclebox cardbody ">
+            <div className="d-flex mt-3 justify-content-center align-items-center">
           <input
             className="referral-search-doctor "
             type="text"
@@ -98,6 +192,7 @@ export default function AppointmentReferral() {
           />
           <Button
             type="primary"
+            style={{height:"40px",marginLeft:"10px"}}
             className="referral-search-btn"
             onClick={() => {
               setHPList([]);
@@ -109,73 +204,58 @@ export default function AppointmentReferral() {
             Search
           </Button>
         </div>
-        <div style={{position:"relative"}}>
-        <div className="d-flex mt-4" style={{gap:"10px"}}>
-          {hpList.map((hp) => {
-            return (
+            <div className="ant-list-box table-responsive mt-5 " >
+        {hpList.length===0 ? 
+         <Empty />
+        : 
+        <table className="w-100 referral-table" style={{ overflow: "hidden" }}>
+        <thead>
+          <tr>
+            <th>Doctor Name</th>
+            <th>Doctor Email</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {hpList?.map((hp, index) => (
        
-              <Card
-                style={{
-                  cursor: "pointer",
-                  backgroundColor:
-                    selectedHps.findIndex((hps) => hps.userId === hp.userId) >=
-                    0
-                      ? "#f5f7ff"
-                      : "",
-                }}
-                onClick={() => modifySelectedHps(hp)}
-                className="mt-3 referral-selected-information"
-              >
-                <div style={{ textAlign: "center" }} className="referral-doc pb-3">
-                  <img src={referralImage} className="referral-doctor-img " alt="" />
-                </div>
-              <div className="d-flex align-items-center pb-2" style={{borderBottom:"1px solid rgb(219, 216, 216)"}}>
-              
-              <div className=" all-txts mt-2 ms-2">{hp.firstName}</div>
-                </div> 
-                <div className="d-flex align-items-center mt-2 pb-2" style={{borderBottom:"1px solid rgb(219, 216, 216)"}}>
-                
-              <div className=" all-txts mt-2 ms-2 ">{hp.lastName}</div>
-                </div> 
-                <div className="d-flex align-items-center mt-2">
+            <tr
           
-              <div className=" all-txts  ms-2 m">{hp.userEmail}</div>
-                </div> 
-            
-              </Card>
-           
-            );
-          })}
-         </div>
+              key={index}
+              style={{
+                cursor: "pointer",
+                backgroundColor:
+                  selectedHps.findIndex((hps) => hps.userId === hp.userId) >= 0
+                    ? "#f5f7ff"
+                    : "",
+                
+              }}
+              onClick={() => modifySelectedHps(hp)}
+            >
+              <td >
+                <td className="heading-title" style={{ fontSize: "14px", fontWeight: "normal" }}>
+                  {hp.firstName + " " + hp.lastName}
+                </td>
+              </td>
+              <td className="heading-title " style={{ fontSize: "14px", fontWeight: "normal" }}>{hp.userEmail}</td>
+              <td>
+                <span className="text-xs font-weight-bold mt-10">
+                  <Button onClick={() => setReferralModel(true)} type="primary">
+                    Add Referral Description
+                  </Button>
+                </span>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table> }
+ 
+</div>
 
-          {selectedHps.length !== 0 && (
-            <div className=" mt-4">
-              <input
-                className="referral-search-doctor2 "
-                type="text"
-                placeholder="Referral Description"
-                value={referralDescription}
-                onChange={(e) => setReferralDescription(e.target.value)}
-              />
-              <Button
-                type="primary"
-                onClick={() => addReferral()}
-                className="referral-search-btn"
-              >
-                Add Referral
-              </Button>
-            </div>
-          )}
-           <div className="load-more" >
-         {pageNumber <= totalNumberOfPages && !loadMore && (
-            <Button type="primary" onClick={() => setLoadMore(true)} className="mt-3">
-              Load more
-            </Button>
-          )}
-           
-          </div>
-          {loadMore && "loading..."}
-        </div>
+            </Card>
+          </Col>
+        </Row>
+    </div>
       </Col>
     </Main>
   );

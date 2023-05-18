@@ -20,32 +20,34 @@ import { util } from "../public/util";
 import moment from "moment";
 import { userController } from "../controllers/userController";
 import AllHealthProfessionals from "../components/AllHealthProfessionals";
+import { useTranslation } from "react-i18next";
 
 export default function Dashboard() {
+  const [t, i18n] = useTranslation();
   const count = [
     {
-      today: "Total Appointments",
+      today: t("total_appointment"),
       title: "$53,000",
       icon: <Dollor />,
       bnb: "bnb2",
       key: "totalAppointments",
     },
     {
-      today: "Total Patients",
+      today: t("Total_Patients"),
       title: "3,200",
       icon: <Profile />,
       bnb: "bnb2",
       key: "totalPatients",
     },
     {
-      today: "Total Blocked Users",
+      today: t("Total_Blocked_Users"),
       title: "+1,200",
       icon: <Heart />,
       bnb: "bnb2",
       key: "totalBlockedUsers",
     },
     {
-      today: "Total Referrals",
+      today:  t("Total_Referrals"),
       title: "$13,200",
       icon: <Cart />,
       bnb: "bnb2",
@@ -55,28 +57,28 @@ export default function Dashboard() {
 
   const count2 = [
     {
-      today: "Total Appointments",
+      today: t("total_appointment"),
       title: "$53,000",
       icon: <Dollor />,
       bnb: "bnb2",
       key: "totalAppointments",
     },
     {
-      today: "Done Appointments",
+      today:t("done_appointment"),
       title: "3,200",
       icon: <Profile />,
       bnb: "bnb2",
       key: "totalDoneAppointments",
     },
     {
-      today: "Accepted Appointments",
+      today: t("accepted_appointment"),
       title: "+1,200",
       icon: <Heart />,
       bnb: "bnb2",
       key: "totalAcceptedAppointments",
     },
     {
-      today: "Rejected Appointments",
+      today: t("rejected_appointment"),
       title: "$13,200",
       icon: <Cart />,
       bnb: "bnb2",
@@ -86,28 +88,28 @@ export default function Dashboard() {
 
   const count3 = [
     {
-      today: "Total Appointments",
+      today: t("total_appointment"),
       title: "$53,000",
       icon: <Dollor />,
       bnb: "bnb2",
       key: "totalAppointments",
     },
     {
-      today: "Total Patients",
+      today: t("Total_Patients"),
       title: "3,200",
       icon: <Profile />,
       bnb: "bnb2",
       key: "totalPatients",
     },
     {
-      today: "Total Health Professionals",
+      today:t("Total_hp"),
       title: "+1,200",
       icon: <Heart />,
       bnb: "bnb2",
       key: "totalHps",
     },
     {
-      today: "Total Users",
+      today:t("Total_users"),
       title: "$13,200",
       icon: <Cart />,
       bnb: "bnb2",
@@ -217,7 +219,7 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userData.loadingApp) {
       if (
-        userData.businessAccountInfo === -2 &&
+        userData.userInfo.userRole === "ADMIN" &&
         loadMore &&
         paginationProps.pageNumber <= paginationProps.totalNumberOfPages
       ) {

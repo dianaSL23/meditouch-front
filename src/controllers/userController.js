@@ -401,6 +401,13 @@ const addDate = ({ body }) => {
     data: body,
   });
 };
+const updateUserLanguage = ({ body }) => {
+  return axios({
+    method: "PUT",
+    url: url + "updateUserLanguage",
+    data: body,
+  });
+};
 const getDate = () => {
   return axios({
     method: "GET",
@@ -458,6 +465,12 @@ const getUser = ({ userFk }) => {
     url: url + "getUser/" + userFk,
   });
 };
+const getTranslations = ({ lng }) => {
+  return axios({
+    method: "GET",
+    url: url + "getTranslations/" + lng,
+  });
+};
 const setMedicalInformation = ({ body }) => {
   return axios({
     method: "PUT",
@@ -467,6 +480,8 @@ const setMedicalInformation = ({ body }) => {
 };
 
 export const userController = {
+  updateUserLanguage,
+  getTranslations,
   getUser,
   updateProfilePicture,
   deleteReservationSlotBySlot,

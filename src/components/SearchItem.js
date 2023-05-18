@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import Lock from "../icons/lock";
 import { util } from "../public/util";
 import "../assets/styles/search-item.css";
-import { func } from "prop-types";
 import { useDispatch, useSelector } from "react-redux";
 import { userController } from "../controllers/userController";
 import avatar from "../assets/images/avatar.jpg";
@@ -56,7 +55,7 @@ export default function SearchItem({ item }) {
   }
   useEffect(() => {
     let indexOfBusinessAccountFk = userData.schedules.findIndex(
-      (s) => s?.businessAccountFk === item.userDetails.businessAccountId
+      (s) => s?.businessAccountFk === item.userDetails?.businessAccountId
     );
     if (indexOfBusinessAccountFk >= 0) {
       setLoadingSchedule(true);
@@ -69,11 +68,14 @@ export default function SearchItem({ item }) {
   useEffect(() => {
     let schedule = item.userSchedule;
 
-    formatSchedule(schedule);
+    if (schedule) {
+      formatSchedule(schedule);
+    }
   }, []);
 
   const [slotIndexChosen, setSlotIndexChosen] = useState(0);
   const [slots, setSlots] = useState([]);
+  console.log(slots);
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -127,9 +129,9 @@ export default function SearchItem({ item }) {
         .registerAppointment({
           body: {
             slotFk: slots[slotIndexChosen].slotId,
-            businessAccountFk: item.userDetails.businessAccountId,
-            businessAccountUserId: item.userDetails.userId,
-            userFk: userData.userInfo.userId,
+            businessAccountFk: item.userDetails?.businessAccountId,
+            businessAccountUserId: item.userDetails?.userId,
+            userFk: userData.userInfo?.userId,
             serviceFk: slots[slotIndexChosen].serviceId,
             appointmentDescription: appointmentDescription,
           },
@@ -198,7 +200,7 @@ export default function SearchItem({ item }) {
   }, [userData.reservedSlots]);
   function modifyFavorite() {
     let indexOfFavorite = userData.favoriteDoctors.findIndex(
-      (d) => d.businessAccountFk === item.userDetails.businessAccountId
+      (d) => d.businessAccountFk === item.userDetails?.businessAccountId
     );
     if (indexOfFavorite >= 0) {
       userController.deleteFavorite({
@@ -207,11 +209,12 @@ export default function SearchItem({ item }) {
     } else {
       userController.addFavorite({
         body: {
-          businessAccountFk: item.userDetails.businessAccountId,
+          businessAccountFk: item.userDetails?.businessAccountId,
           userFk: userData.userInfo.userId,
         },
       });
     }
+    window.location.reload();
   }
   const handleOk = (e) => {
     setReservedModal(false);
@@ -350,14 +353,17 @@ export default function SearchItem({ item }) {
             <div className="all-txts me-2">Appointment Time: </div>
             <div>{slots[slotIndexChosen]?.slotStartTime}</div>
           </div>
-          <div className="d-flex align-items-center mt-2">
+          <div className="d-flex flex-column mt-2">
             <div className="all-txts me-2">Appointment Description: </div>
-            <input
-              type="text"
-              value={appointmentDescription}
-              onChange={(e) => setAppointmentDescription(e.target.value)}
-              placeholder="Appointment Description"
-            />
+            <div className="appointment-desc-input-wrapper mt-1">
+              <textarea
+                className="appointment-info-input mt-2 pt-2"
+                type="text"
+                value={appointmentDescription}
+                onChange={(e) => setAppointmentDescription(e.target.value)}
+                placeholder="Appointment Description"
+              />
+            </div>
           </div>
         </div>
       ) : (
@@ -371,17 +377,27 @@ export default function SearchItem({ item }) {
       )}
     </Modal>
   );
+
   return (
-    <Col xs={24} sm={24} md={12} lg={9} xl={10}>
+    <Col
+      xs={24}
+      sm={24}
+      md={12}
+      lg={9}
+      xl={10}
+      style={{ marginBottom: "10px" }}
+    >
       {modal}
       {appointmentModalUi}
+
       <Card
         title={
           <div className="d-flex justify-content-between">
             <Avatar.Group>
               <Avatar
+                className="appointment-profile"
                 size={50}
-                shape="square"
+                shape="circle"
                 src={
                   item.userDetails?.profilePicture
                     ? item.userDetails?.profilePicture
@@ -389,24 +405,24 @@ export default function SearchItem({ item }) {
                 }
               />
 
-              <div className="avatar-info">
+              <div className="avatar-info ms-2">
                 <div className="">
-                  {item.userDetails.firstName +
+                  {item.userDetails?.firstName +
                     " " +
                     item.userDetails?.lastName}
                 </div>
-                <p>{item.userDetails.specialityName}</p>
+                <p>{item.userDetails?.specialityName}</p>
               </div>
             </Avatar.Group>
             {util.isUserAuthorized() &&
-              (item.userDetails.businessAccountId !==
+              (item.userDetails?.businessAccountId !==
               userData.businessAccountInfo?.businessAccountId ? (
                 <div
                   title={
                     userData.favoriteDoctors.findIndex(
                       (d) =>
                         d.businessAccountFk ===
-                        item.userDetails.businessAccountId
+                        item.userDetails?.businessAccountId
                     ) >= 0
                       ? "Remove Favorite"
                       : "Add Favorite"
@@ -415,7 +431,8 @@ export default function SearchItem({ item }) {
                 >
                   {userData.favoriteDoctors.findIndex(
                     (d) =>
-                      d.businessAccountFk === item.userDetails.businessAccountId
+                      d.businessAccountFk ===
+                      item.userDetails?.businessAccountId
                   ) >= 0 ? (
                     <HeartFilled />
                   ) : (
@@ -432,10 +449,10 @@ export default function SearchItem({ item }) {
           <div className="global-search-card-titles">
             {slotIndexChosen !== -1 && (
               <div>
-                <div>
+                <div className="services-txt">
                   {" Service Name : " + slots[slotIndexChosen]?.serviceName}
                 </div>
-                <div>
+                <div className="services-txt">
                   {" Service Price : " +
                     slots[slotIndexChosen]?.servicePrice +
                     " " +
@@ -445,11 +462,14 @@ export default function SearchItem({ item }) {
             )}
           </div>
           <div>
-            <div className="global-search-card-titles">
+            <div className="global-search-card-titles services-txt">
               Schedule between {moment(daysOfWeek[0]).format("YYYY-MM-DD")} and{" "}
               {moment(daysOfWeek[daysOfWeek.length - 1]).format("YYYY-MM-DD")}
             </div>
-            <Row className="rowgap-vbox mt-3" gutter={[24, 0]}>
+            <Row
+              className="display-flex align-items-center justify-content-center  mt-3"
+              gutter={[24, 0]}
+            >
               {daysOfWeek.map((day, index) => {
                 return (
                   <Col
@@ -461,12 +481,13 @@ export default function SearchItem({ item }) {
                     title={moment(day).format("YYYY-MM-DD")}
                     onClick={() => setDayChosen(index)}
                     key={
-                      "day" + item.userDetails.businessAccountId + "" + index
+                      "day" + item.userDetails?.businessAccountId + "" + index
                     }
+                    className="slots-time"
                   >
                     <div
                       className={classNames(
-                        "global-search-card-schedule-days",
+                        "global-search-card-schedule-days ",
                         {
                           "global-search-card-selected-schedule-days":
                             dayChosen === index,
@@ -481,7 +502,7 @@ export default function SearchItem({ item }) {
             </Row>
             <div
               className={classNames(
-                "d-flex justify-content-center flex-wrap mt-3 global-search-card-schedule-all-slots",
+                "d-flex justify-content-center flex-wrap mt-3 all-slots",
                 {}
               )}
             >
@@ -527,7 +548,10 @@ export default function SearchItem({ item }) {
                         }
                       }}
                       key={
-                        "slot" + item.userDetails.businessAccountId + "" + index
+                        "slot" +
+                        item.userDetails?.businessAccountId +
+                        "" +
+                        index
                       }
                     >
                       {slot.isLocked && <Lock />}
@@ -557,7 +581,8 @@ export default function SearchItem({ item }) {
                 // disabled={slotIndexChosen === -1 || userData.userInfo.userId === item.userDetails.userId}
                 disabled={
                   slotIndexChosen === -1 ||
-                  userData.userInfo?.userRole !== "PATIENT"
+                  userData.userInfo?.userRole !== "PATIENT" ||
+                  item.userDetails.blockId !== -1
                 }
                 onClick={() => setAppointmentModal(true)}
               >

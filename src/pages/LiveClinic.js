@@ -4,12 +4,13 @@ import Title from "antd/lib/skeleton/Title";
 import moment from "moment";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-
+import img from "../assets/images/healthcare.png";
 import "../assets/styles/schedule.css";
 import Main from "../components/layout/Main";
 import { businessAccountController } from "../controllers/businessAccountController";
 import { userController } from "../controllers/userController";
 import { util } from "../public/util";
+import { toast } from "react-toastify";
 
 export default function LiveClinic() {
   const { Title, Text } = Typography;
@@ -189,31 +190,72 @@ export default function LiveClinic() {
 
     return () => clearInterval(intervalId);
   }, [currentAppointmentIndex, minutesRemaining, secondsRemaining]);
-
-  function modifyAppointmentPrescription(t, index) {
-    if (t.prescriptionId === -1) {
-      businessAccountController
-        .addAppointmentPrescription({
-          body: {
-            appointmentFk: t.appointmentId,
-            prescriptionDescription: prescriptionData,
-          },
-        })
-        .then((response) => {
-          let prescriptionId = response.data.result.prescriptionId;
-          let tempAppointments = [...appointments];
-          tempAppointments[index].prescriptionId = prescriptionId;
-          setAppointments(tempAppointments);
-        });
-    } else {
-      businessAccountController.updateAppointmentPrescription({
-        body: {
-          prescriptionId: t.prescriptionId,
-          prescriptionDescription: prescriptionData,
-          appointmentFk: t.appointmentId,
-        },
+  const valid = () => {
+    let valid = true;
+    if (prescriptionData.replace(/\s+/g, "") === "") {
+      valid = false;
+      toast.error("missing fields", {
+        position: "top-center",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: false,
+        draggable: false,
       });
     }
+    return valid;
+  };
+
+  function modifyAppointmentPrescription(t, index) {
+    if (valid()) {
+      if (t.prescriptionId === -1) {
+        businessAccountController
+          .addAppointmentPrescription({
+            body: {
+              appointmentFk: t.appointmentId,
+              prescriptionDescription: prescriptionData,
+            },
+          })
+          .then((response) => {
+            if (response && response.status === 200) {
+              let prescriptionId = response.data.result.prescriptionId;
+              let tempAppointments = [...appointments];
+              tempAppointments[index].prescriptionId = prescriptionId;
+              setAppointments(tempAppointments);
+              toast.success("Prescription Added Successfully", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+              });
+            }
+          });
+      } else {
+        businessAccountController
+          .updateAppointmentPrescription({
+            body: {
+              prescriptionId: t.prescriptionId,
+              prescriptionDescription: prescriptionData,
+              appointmentFk: t.appointmentId,
+            },
+          })
+          .then((response) => {
+            if (response && response.status === 200) {
+              toast.success("Prescription Updated Successfully", {
+                position: "top-center",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: false,
+                draggable: false,
+              });
+            }
+          });
+      }
+    }
+    setPrescriptionData("");
   }
   const handleOk = (e) => {
     setMedicalInfoModal(false);
@@ -241,6 +283,15 @@ export default function LiveClinic() {
         hidden: true,
       }}
     >
+      <div
+        className="d-flex align-items-center appointment-pres-wrapper 
+      justify-content-center"
+        style={{ gap: "20px" }}
+      >
+        <div>
+          <img src={img} alt="" />
+        </div>
+      </div>
       <div>Height : {appointments[viewMedicalInfoIndex]?.height + " cm"}</div>
       <div className="mt-2">
         Weight : {appointments[viewMedicalInfoIndex]?.weight + " Kg"}
@@ -344,6 +395,7 @@ export default function LiveClinic() {
                             <>
                               <Button
                                 type="primary"
+                                className="add-pres"
                                 onClick={() => setPrescriptionModal(true)}
                               >
                                 {t.prescriptionId === -1
@@ -356,28 +408,57 @@ export default function LiveClinic() {
                                 onCancel={handlePrescriptionCancel}
                                 okButtonProps={{
                                   disabled: false,
-                                  hidden: false,
+                                  hidden: true,
                                 }}
                                 cancelButtonProps={{
                                   disabled: true,
                                   hidden: true,
                                 }}
                               >
-                                <div>
-                                  Add Appointment Prescription :
-                                  <input
-                                    type="text"
+                                <div
+                                  className="d-flex align-items-center appointment-pres-wrapper 
+      justify-content-center"
+                                  style={{ gap: "20px" }}
+                                >
+                                  <div>
+                                    <img src={img} alt="" />
+                                  </div>
+                                  <div className="d-flex flex-column justify-content-center pe-4">
+                                    <div
+                                      className="all-txts4  "
+                                      style={{ fontSize: "18px" }}
+                                    >
+                                      MediTouch
+                                    </div>
+                                    <div className="all-txts3">
+                                      Your healthcare is our responsibility
+                                    </div>
+                                  </div>
+                                </div>
+                                <div className="appointment-pres-information">
+                                  <textarea
+                                    className="add-prescription-info"
                                     value={prescriptionData}
                                     onChange={(e) =>
                                       setPrescriptionData(e.target.value)
                                     }
                                   />
+                                </div>
+                                <div
+                                  style={{
+                                    position: "relative",
+                                    float: "right",
+                                    top: "13px",
+                                    marginLeft: "10px",
+                                  }}
+                                >
                                   <input
                                     type="button"
+                                    className="add-prescription-btn"
                                     value="Add"
                                     onClick={() => {
                                       modifyAppointmentPrescription(t, index);
-                                      setPrescriptionModal(true);
+                                      setPrescriptionModal(false);
                                     }}
                                   />
                                 </div>

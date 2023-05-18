@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import LayoutWrapper from "../components/Layout";
 import "../assets/styles/contactUs.css";
-import { useNavigate, Link } from "react-router-dom";
-import contactus from "../assets/images/contactus.jfif";
+import contactus from "../assets/images/contact.jpg";
 import {
   Layout,
   Menu,
@@ -19,54 +18,74 @@ import {
 import { Content } from "antd/lib/layout/layout";
 import { userController } from "../controllers/userController";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
 const { TextArea } = Input;
 
 const ContactUs = () => {
+  const [t, i18n] = useTranslation();
   const [firstname, setFirstName] = useState("");
   const [lastname, setLastName] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  console.log(firstname);
+const valid=()=>{
+  let valid=true;
 
-  const submit = () => {
-    userController
-    .contactUs({
-      body: {
-        firstName: firstname,
-        lastName: lastname,
-        subject: subject,
-        message: message,
-      },
-    })
-    .then((response) => {
-      let data = response.data;
-      if (data.responseCode=== 200) {
-        setFirstName("");
-        setLastName("");
-        setSubject("");
-        setMessage("");
-  
-        toast.success("message submitted sucessfully", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-        });
-      }
+  if(firstname.replace(/\s+/g, "") === "" || lastname.replace(/\s+/g, "") === ""
+  || subject.replace(/\s+/g, "") === "" || message.replace(/\s+/g, "") === ""){
+    valid=false;
+    toast.error("missing fields", {
+      position: "top-center",
+      autoClose: 5000,
+      hideProgressBar: true,
+      closeOnClick: true,
+      pauseOnHover: false,
+      draggable: false,
     });
+  }
+  return valid;
+}
+  const submit = () => {
+    if(valid()){
+      userController
+      .contactUs({
+        body: {
+          firstName: firstname,
+          lastName: lastname,
+          subject: subject,
+          message: message,
+        },
+      })
+      .then((response) => {
+        let data = response.data;
+        if (data.responseCode=== 200) {
+     
+          toast.success("message submitted sucessfully", {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+          });
+        }
+      });
+    }
+    setFirstName("");
+    setLastName("");
+    setSubject("");
+    setMessage("");
   }
   const content = (
     <Content className="p-0 ">
-      <Row justify="center">
+      <Row justify="center"  className="d-flex align-items-center justify-content-center"
+      >
         <Col xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }}>
           <img
             src={contactus}
             alt=""
-            className="contact-us-img  "
-            style={{ marginTop: "100px" }}
+            className="signup-image"
+            
           />
         </Col>
         <Col
@@ -74,12 +93,12 @@ const ContactUs = () => {
           lg={{ span: 6, offset: 2 }}
           md={{ span: 12 }}
         >
-          <div className="text-center signin-txt-title mb-4">Contact Us</div>
+          <div className="text-center forgotPass-txt mb-4">{t("contact_us")}</div>
 
           <Form layout="vertical" className="row-col">
             <Form.Item
               className="username"
-              label="First Name"
+              label={t("first_name")}
               name="first name"
               rules={[
                 {
@@ -91,13 +110,13 @@ const ContactUs = () => {
               <Input
                 value={firstname}
                 onChange={(e) => setFirstName(e.target.value)}
-                placeholder="First Name"
+                placeholder={t("first_name")}
               />
             </Form.Item>
 
             <Form.Item
               className="username"
-              label="Last Name"
+              label={t("last_name")}
               name="lastname"
               rules={[
                 {
@@ -107,14 +126,14 @@ const ContactUs = () => {
               ]}
             >
               <Input
-                placeholder="Last Name"
+                placeholder={t("last_name")}
                 value={firstname}
                 onChange={(e) => setLastName(e.target.value)}
               />
             </Form.Item>
             <Form.Item
               className="username"
-              label="Subject"
+              label={t("subject")}
               name="subject"
               rules={[
                 {
@@ -126,12 +145,12 @@ const ContactUs = () => {
               <Input
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
-                placeholder="Subject"
+                placeholder={t("subject")}
               />
             </Form.Item>
             <Form.Item
               className="username"
-              label="Message"
+              label={t("message")}
               name="message"
               rules={[
                 {
@@ -154,7 +173,7 @@ const ContactUs = () => {
                 htmlType="submit"
                 style={{ width: "100%" }}
               >
-                Submit
+                {t("submit")}
               </Button>
             </Form.Item>
           </Form>

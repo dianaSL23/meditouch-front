@@ -1,29 +1,33 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
 import Scheduler, {
   AppointmentDragging,
   View,
 } from "devextreme-react/scheduler";
-import Draggable from "devextreme-react/draggable";
-import ScrollView from "devextreme-react/scroll-view";
+
 import "../assets/styles/schedule.css";
 import Main from "../components/layout/Main";
-import { Button, InputNumber, TimePicker } from "antd";
+import { Button, Calendar, InputNumber, Spin } from "antd";
 import { util } from "../public/util";
 import moment from "moment";
+
 import classNames from "classnames";
 import { businessAccountController } from "../controllers/businessAccountController";
 import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 
+ 
 const draggingGroupName = "appointmentsGroup";
 
 export default function Schedule() {
+  const [t, i18n] = useTranslation();
   const [allSlots, setAllSlots] = useState([]);
   const [services, setServices] = useState([]);
   const [serviceSelected, setServiceSelected] = useState(-1);
   const [restTime, setRestTime] = useState(0);
   const [mySlots, setMySlots] = useState([]);
+  const [loadingData, setLoadingData] = useState(true);
   const [slotDuration, setSlotDuration] = useState(20);
   const [daysOfWeek, setDaysOfWeek] = useState([]);
   const [daysChosen, setDaysChosen] = useState([]);
@@ -36,6 +40,7 @@ export default function Schedule() {
   });
   useEffect(() => {
     if (!userData.loadingApp) {
+      setLoadingData(true);
       businessAccountController
         .getServices({
           businessAccountFk: userData.businessAccountInfo.businessAccountId,
@@ -88,6 +93,9 @@ export default function Schedule() {
 
             setMySlots(tempSchedule);
           }
+        })
+        .then(() => {
+          setLoadingData(false);
         });
     }
   }, [userData.loadingApp]);
@@ -137,19 +145,6 @@ export default function Schedule() {
     }
   }
 
-  function onListDragStart(e) {
-    e.cancel = true;
-  }
-
-  function onItemDragStart(e) {
-    e.itemData = e.fromData;
-  }
-
-  function onItemDragEnd(e) {
-    if (e.toData) {
-      e.cancel = true;
-    }
-  }
   function modifyTiming(key, value) {
     let temptimes = { ...times };
     temptimes[key] = value;
@@ -232,7 +227,6 @@ export default function Schedule() {
     if (!overlapped) {
       setMySlots(tempMySlots);
     } else {
-     
       toast.warning("timings overlap", {
         position: "top-center",
         autoClose: 5000,
@@ -266,31 +260,33 @@ export default function Schedule() {
         serviceFk: serviceSelected,
       });
     }
-    businessAccountController.setSchedule({
-      businessAccountId: userData.businessAccountInfo.businessAccountId,
-      body: body,
-    }).then((response)=>{
-      let data = response.data;
-      if (data.responseCode === -1) {
-        toast.error(data.message, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-        });
-      }else{
-        toast.success(data.message, {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: true,
-          closeOnClick: true,
-          pauseOnHover: false,
-          draggable: false,
-        });
-      }
-    })
+    businessAccountController
+      .setSchedule({
+        businessAccountId: userData.businessAccountInfo.businessAccountId,
+        body: body,
+      })
+      .then((response) => {
+        let data = response.data;
+        if (data.responseCode === -1) {
+          toast.error(data.message, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+          });
+        } else {
+          toast.success(data.message, {
+            position: "top-center",
+            autoClose: 5000,
+            hideProgressBar: true,
+            closeOnClick: true,
+            pauseOnHover: false,
+            draggable: false,
+          });
+        }
+      });
   }
   function deleteSchedule() {
     businessAccountController
@@ -301,16 +297,20 @@ export default function Schedule() {
         setMySlots([]);
       });
   }
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const minDate = moment(daysOfWeek[0]) 
+  const maxDate = moment(daysOfWeek[daysOfWeek.length - 1]) 
   return (
     <Main>
-      <div className="d-flex justify-content-between">
-        <div className="d-flex"  style={{gap:"10px"}}>
+      <div className="d-flex justify-content-between schedule-btns">
+        <div className="d-flex" style={{ gap: "10px" }}>
           <select
             onChange={(e) => setServiceSelected(e.target.value)}
             defaultValue={-1}
+            className="schedule-time-date"
           >
             <option disabled value={-1}>
-              Select Service
+            {t("select_service")}
             </option>
             {services.map((service, index) => {
               return (
@@ -319,7 +319,7 @@ export default function Schedule() {
             })}
           </select>
           <InputNumber
-           className="schedule-time-date"
+            className="schedule-time-date"
             size="large"
             min={1}
             max={60}
@@ -327,7 +327,8 @@ export default function Schedule() {
             onChange={setSlotDuration}
           />
           <input
-          className="schedule-time-date"
+            className="schedule-time-date "
+            style={{paddingTop:"2px"}}
             type={"time"}
             value={times.startTime}
             onChange={(e) => modifyTiming("startTime", e.target.value)}
@@ -335,11 +336,12 @@ export default function Schedule() {
           <input
             className="schedule-time-date"
             type={"time"}
+            style={{paddingTop:"2px"}}
             value={times.endTime}
             onChange={(e) => modifyTiming("endTime", e.target.value)}
           />
           <InputNumber
-           className="schedule-time-date"
+            className="schedule-time-date"
             size="large"
             min={1}
             max={60}
@@ -348,9 +350,10 @@ export default function Schedule() {
           />
         </div>
 
-        <div className="d-flex align-items-center" style={{gap:"5px"}}>
+        <div className="d-flex align-items-center" style={{ gap: "5px" }}>
+       
           {daysOfWeek.map((day, index) => {
-            return (
+            return (         
               <div
                 title={moment(day).format("YYYY-MM-DD")}
                 key={"day" + index}
@@ -364,58 +367,89 @@ export default function Schedule() {
                   }
                   setDaysChosen(tempDaysChosen);
                 }}
-                className={classNames("schedule-day", {
+                className={classNames("schedule-day ", {
                   "chosen-schedule-day":
                     daysChosen.findIndex((i) => i === index) >= 0,
                 })}
               >
                 {moment(day).format("dd")}
               </div>
+       
             );
           })}
+           
+
           <Button type="primary" onClick={() => fetchSlots()}>
-            Publish Slots
+          {t("publish_slots")}
           </Button>
           <Button type="primary" onClick={() => addSlots()}>
-            Add Slots
+          {t("add_slots")}
           </Button>
           {mySlots.length !== 0 && (
             <Button type="primary" onClick={() => deleteSchedule()}>
-              Delete Schedule
+            {t("delete_schedule")}
             </Button>
+         
           )}
+       
         </div>
       </div>
-      <div className="d-flex w-100 mt-3">
-        <Scheduler
-          min={new Date(daysOfWeek[0])}
-          max={new Date(daysOfWeek[daysOfWeek.length - 1])}
-          id="scheduler"
-          dataSource={mySlots}
-          defaultCurrentView="Vertical Grouping"
-          startDayHour={9}
-          maxAppointmentsPerCell={1}
-          editing={{
-            allowDeleting: true,
-            allowDragging: true,
-            allowAdding: true,
+      <div className="d-flex h-100 justify-content-center align-items-center w-100 mt-3">
+        {loadingData || daysOfWeek.length === 0 ? (
+          <Spin tip="Loading" size="large">
+            <div className="content" />
+          </Spin>
+        ) : (
+          // <Scheduler
+          //   min={new Date(daysOfWeek[0])}
+          //   max={new Date(daysOfWeek[daysOfWeek.length - 1])}
+          //   id="scheduler"
+          //   dataSource={mySlots}
+          //   defaultCurrentView="Vertical Grouping"
+          //   defaultCurrentDate={currentDate}
+          //   startDayHour={9}
+          //   maxAppointmentsPerCell={1}
+        
+          //   editing={{
+          //     allowDeleting: true,
+          //     allowDragging: true,
+          //     allowAdding: true,
+          //   }}
+          //   crossScrollingEnabled={true}
+          //   showAllDayPanel={false}
+          // >
+          //   <View
+          //     name="Weekly Schedule"
+          //     type="week"
+          //     groupOrientation="vertical"
+          //     cellDuration={slotDuration}
+          //   />
+          //   <AppointmentDragging
+          //     group={draggingGroupName}
+          //     onRemove={onAppointmentRemove}
+          //     onAdd={onAppointmentAdd}
+          //     onDragEnd={onAppointmentDrag}
+          //   />
+          // </Scheduler>
+          <Calendar
+          mode="week"
+          validRange={[minDate, maxDate]} // Set the valid range of dates
+          showHeader={false}
+          showTime
+          dateCellRender={(date) => {
+            const slotsForDate = mySlots.filter(
+              (slot) => moment(slot.startDate).isSame(date, 'day')
+            );
+            return (
+              <ul>
+                {slotsForDate.map((slot) => (
+                  <li key={slot.index}>{moment(slot.startDate).format('HH:mm')}</li>
+                ))}
+              </ul>
+            );
           }}
-          crossScrollingEnabled={true}
-          showAllDayPanel={false}
-        >
-          <View
-            name="Weekly Schedule"
-            type="week"
-            groupOrientation="vertical"
-            cellDuration={slotDuration}
-          />
-          <AppointmentDragging
-            group={draggingGroupName}
-            onRemove={onAppointmentRemove}
-            onAdd={onAppointmentAdd}
-            onDragEnd={onAppointmentDrag}
-          />
-        </Scheduler>
+        />
+        )}
       </div>
     </Main>
   );

@@ -4,22 +4,18 @@ import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import Main from "../components/layout/Main";
 import { businessAccountController } from "../controllers/businessAccountController";
-import { userController } from "../controllers/userController";
+import { useTranslation } from "react-i18next";
 
 export default function Referrals() {
-  const { Title, Text } = Typography;
+  const [t, i18n] = useTranslation();
   const navigate = useNavigate();
-  const { state } = useLocation();
   const userData = useSelector((state) => state);
   const dispatch = useDispatch();
-  const [hpList, setHPList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pageNumber, setPageNumber] = useState(-1);
   const [totalNumberOfPages, setTotalNumberOfPages] = useState(1);
   const [loadMore, setLoadMore] = useState(true);
-  const [searchText, setSearchText] = useState("");
-  const [selectedHps, setSelectedHps] = useState([]);
-  const [referralDescription, setReferralDescription] = useState("");
+
   useEffect(() => {
     if (!userData.loadingApp) {
       if (loadMore && pageNumber <= totalNumberOfPages) {
@@ -58,14 +54,13 @@ export default function Referrals() {
       },
     });
   }
-  console.log("ref",userData.myReferrals);
   return (
     <Main>
       <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
         <Card bordered={false} className="criclebox cardbody ">
           <div className="project-ant">
             <div>
-              <div className="heading-title">Your Referrals</div>
+              <div className="heading-title">{t("your_referrals")}</div>
             </div>
           </div>
           {loading ? (
@@ -79,12 +74,12 @@ export default function Referrals() {
               <table className="width-100">
                 <thead>
                   <tr>
-                    <th>DOCTOR NAME</th>
-                    <th>DOCTOR EMAIL</th>
-                    <th>PATIENT NAME</th>
-                    <th>PATIENT EMAIL</th>
+                    <th>{t("doctor_name")}</th>
+                    <th>{t("doctor_email")}</th>
+                    <th>{t("patient_name")}</th>
+                    <th>{t("patient_mail")}</th>
 
-                    <th>ACTION</th>
+                    <th>{t("action")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -108,7 +103,7 @@ export default function Referrals() {
                             onClick={() => viewAppointment(ap.appointmentFk)}
                             type="primary"
                           >
-                            View Appointment
+                            View Referral
                           </Button>
                         </span>
                       </td>

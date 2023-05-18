@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -6,32 +5,16 @@ import {
   Col,
   Card,
   Button,
-  List,
   Descriptions,
   Avatar,
-  Radio,
   Switch,
-  Upload,
-  message,
+  
 } from "antd";
 
-import {
-  FacebookOutlined,
-  TwitterOutlined,
-  InstagramOutlined,
-  VerticalAlignTopOutlined,
-} from "@ant-design/icons";
 
-import BgProfile from "../assets/images/patientImg.jpg";
-import profilavatar from "../assets/images/face-1.jpg";
-import convesionImg from "../assets/images/face-3.jpg";
-import convesionImg2 from "../assets/images/face-4.jpg";
-import convesionImg3 from "../assets/images/face-5.jpeg";
-import convesionImg4 from "../assets/images/face-6.jpeg";
-import convesionImg5 from "../assets/images/face-2.jpg";
-import project1 from "../assets/images/home-decor-1.jpeg";
-import project2 from "../assets/images/home-decor-2.jpeg";
-import project3 from "../assets/images/home-decor-3.jpeg";
+
+import BgProfile from "../assets/images/patientBG.PNG";
+
 import Main from "../components/layout/Main";
 import avatar from "../assets/images/avatar.jpg";
 import { UploadOutlined } from "@ant-design/icons";
@@ -39,8 +22,10 @@ import { businessAccountController } from "../controllers/businessAccountControl
 import { useNavigate } from "react-router-dom";
 import { userController } from "../controllers/userController";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 function UserProfile() {
   const dispatch = useDispatch();
+  const [t, i18n] = useTranslation();
   const userData = useSelector((state) => state);
   const navigate = useNavigate();
   async function upload(file) {
@@ -118,8 +103,9 @@ function UserProfile() {
         className="profile-nav-bg"
         style={{
           backgroundImage: "url(" + BgProfile + ")",
-          height: "400px",
+          height: "500px",
           width: "100%",
+          
         }}
       ></div>
 
@@ -186,23 +172,25 @@ function UserProfile() {
                   <Button
                     style={{ position: "absolute", left: 0, top: 0, zIndex: 0 }}
                     icon={<UploadOutlined />}
+                    className="d-flex align-items-center "
                   >
-                    Upload
+                     {t("upload")}
                   </Button>
                 </div>
                 {userData.userInfo &&
                   userData.userInfo?.profilePicture !== "" &&
                   userData.userInfo.profilePicture !== -1 && (
-                    <Button onClick={() => deletepic()}>DELETE</Button>
+                    <Button onClick={() => deletepic()}  className="ms-3 me-1">  {t("delete")}</Button>
                   )}
                 {userData.userInfo &&
                   !userData.userInfo.businessAccountInfo && (
                     <Button
                       onClick={() => navigate("/patient-details")}
                       type="primary"
+                      className="ms-2 d-flex align-items-center"
                       icon={<UploadOutlined />}
                     >
-                      Edit Profile
+                       {t("edit_profile")}
                     </Button>
                   )}
               </div>
@@ -212,50 +200,50 @@ function UserProfile() {
       ></Card>
 
       <Row gutter={[24, 0]} justify="center">
-        <Col span={24} md={8} className="mb-24">
+        <Col xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }} className="mb-24">
           <Card
             bordered={false}
-            title={<h6 className="font-semibold m-0">Profile Information</h6>}
+            title={<h6 className="font-semibold m-0">{t("profile_info")}</h6>}
             className="header-solid h-full card-profile-information"
             extra={<Button type="link">{}</Button>}
             bodyStyle={{ paddingTop: 0 }}
           >
             <hr className="my-25" />
             <Descriptions title="">
-              <Descriptions.Item label="Full Name" span={3}>
+              <Descriptions.Item label={t("full_name")}  span={3}>
                 {userData.userInfo?.firstName +
                   " " +
                   userData.userInfo?.lastName}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Email" span={3}>
+              <Descriptions.Item label={t("email")} span={3}>
                 {userData.userInfo?.userEmail}
               </Descriptions.Item>
-              <Descriptions.Item label="Height" span={3}>
+              <Descriptions.Item label={t("height")}  span={3}>
                 {userData.userMedicalInfo?.height + " cm"}
               </Descriptions.Item>
-              <Descriptions.Item label="Weight" span={3}>
+              <Descriptions.Item label={t("weight")}  span={3}>
                 {userData.userMedicalInfo?.weight + " kg"}
               </Descriptions.Item>
-              <Descriptions.Item label="Vaccination" span={3}>
+              <Descriptions.Item label={t("vaccination")} span={3}>
                 {userData.userMedicalInfo?.vaccinationDescription}
               </Descriptions.Item>
-              <Descriptions.Item label="Diseases" span={3}>
+              <Descriptions.Item label={t("diseases")}  span={3}>
                 {userData.userMedicalInfo?.diseasesDescription}
               </Descriptions.Item>
             </Descriptions>
           </Card>
         </Col>
-        <Col span={24} md={8} className="mb-24 ">
+        <Col xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }} className="mb-24 ">
           <Card
             bordered={false}
             className="header-solid h-full"
-            title={<h6 className="font-semibold m-0">User Notifications</h6>}
+            title={<h6 className="font-semibold m-0">{t("User_Notifications")}</h6>}
           >
             <ul className="list settings-list">
               <li>
                 <h6 className="list-header text-sm text-muted m-0">
-                  APPLICATION
+                {t("application")}
                 </h6>
               </li>
 
@@ -266,12 +254,12 @@ function UserProfile() {
                   }
                   checked={userData.notificationSettings.onAddFeatureEmail}
                 />
-                <span>New Feature Email</span>
+                <span>{t("user_notification_4")}</span>
               </li>
 
               <li>
                 <h6 className="list-header text-sm text-muted m-0">
-                  REMINDERS
+                {t("reminders")}
                 </h6>
               </li>
               <li>
@@ -281,7 +269,7 @@ function UserProfile() {
                   }
                   checked={userData.notificationSettings.onAppointmentReminder}
                 />
-                <span>Remind me of my next appointments</span>
+                <span>{t("user_notification_6")}</span>
               </li>
             </ul>
           </Card>

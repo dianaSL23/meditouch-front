@@ -5,8 +5,10 @@ import lineChart from "./configs/lineChart";
 import { useEffect, useRef, useState } from "react";
 import { businessAccountController } from "../../controllers/businessAccountController";
 import { useSelector } from "react-redux";
+import { useTranslation } from "react-i18next";
 
 function LineChart() {
+  const [t, i18n] = useTranslation();
   const { Title, Paragraph } = Typography;
   const chartRef = useRef();
   const userData = useSelector((state) => state);
@@ -18,15 +20,14 @@ function LineChart() {
       series: [
         {
           name:
-            (userData.userInfo?.userRole === "PATIENT" ? "Costs" : "Revenue") +
-            " In USD",
+            (userData.userInfo?.userRole === "PATIENT" ?  t("cost_usd"): t("revenue_usd")) 
+            ,
           data: new Array(12).fill(0),
           offsetY: 0,
         },
         {
           name:
-            (userData.userInfo?.userRole === "PATIENT" ? "Costs" : "Revenue") +
-            " In LBP",
+            (userData.userInfo?.userRole === "PATIENT" ? t("cost_lbp") : t("revenue_lbp")) ,
           data: new Array(12).fill(0),
           offsetY: 0,
         },
@@ -41,13 +42,15 @@ function LineChart() {
       }
     }
     setlineChartSeries(tempSeries.series);
+
   }
+  console.log(lineChartSeries)
   useEffect(() => {
     if (!userData.loadingApp) {
-      if (userData.userInfo.userRole === "HEALTH_PROFESSIONAL") {
+      if (userData.userInfo?.userRole === "HEALTH_PROFESSIONAL") {
         businessAccountController
           .getRevenueOfYear({
-            businessAccountFk: userData.businessAccountInfo.businessAccountId,
+            businessAccountFk: userData?.businessAccountInfo.businessAccountId,
             userFk: -1,
           })
           .then((response) => {
@@ -73,8 +76,8 @@ function LineChart() {
       <div className="linechart">
         <div>
           <Title level={5}>
-            Year{" "}
-            {userData.userInfo?.userRole === "PATIENT" ? " Cost " : "Revenue"}
+         
+            {userData.userInfo?.userRole === "PATIENT" ? t("cost_revenue") : t("year_revenue")}
           </Title>
           <Paragraph className="lastweek">
             {/* than last week <span className="bnb2">+30%</span> */}

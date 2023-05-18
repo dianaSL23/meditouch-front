@@ -1,19 +1,18 @@
-import { MenuUnfoldOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Typography, Timeline, Input } from "antd";
-import Title from "antd/lib/skeleton/Title";
-import moment from "moment";
-import React, { useContext, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { Avatar, Button, Card, Col, Input } from "antd";
 
+import React, {  useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import avatar from "../assets/images/avatar.jpg";
 import "../assets/styles/schedule.css";
 import Main from "../components/layout/Main";
-import { businessAccountController } from "../controllers/businessAccountController";
 import { userController } from "../controllers/userController";
-import { SocketWrapperContext } from "../public/SocketWrapper";
+import { useTranslation } from "react-i18next";
 
 export default function CommunityPosts() {
+  const [t, i18n] = useTranslation();
   const userData = useSelector((state) => state);
   const dispatch = useDispatch();
+  const [showAddComment, setShowAddComment] = useState(false); 
   const [loadMore, setLoadMore] = useState(
     userData.communityPosts.pageNumber === -1
   );
@@ -78,7 +77,10 @@ export default function CommunityPosts() {
           userFk: userData.userInfo.userId,
         },
       })
-      .then((response) => {});
+      .then((response) => {
+
+      });
+     
   }
   useEffect(() => {
     if (postSelectedIndex !== -1 && loadMoreComments) {
@@ -134,6 +136,7 @@ export default function CommunityPosts() {
       }
     }
   }, [loadMoreComments]);
+  console.log("comments",userData.communityPosts.posts)
   function addComment() {
     userController.addCommunityPostComment({
       body: {
@@ -142,27 +145,29 @@ export default function CommunityPosts() {
         commentDescription: commentText,
       },
     });
+  
   }
   return (
     <Main>
       <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
-        <Button
+        {/* <Button
         className="ms-3"
           type="primary"
           onClick={() => setAddPostVisibility(!addPostVisibility)}
         >
-          Post
-        </Button>
-        {addPostVisibility && (
-          <Card bordered={false} className="criclebox h-full ">
+          {t("post")}
+        </Button> */}
+      
+          <Card bordered={false} className="criclebox h-full mb-2">
             <Input
               type="text"
               className="patient-details-input mb-4"
-              placeholder="Service Title"
+              placeholder=    {t("service_title")}
               onChange={(e) => updatePostDetails("postService", e.target.value)}
             />
             <Input
               type="text"
+              placeholder=    {t("service_description")}
               className="patient-details-input"
               value={postDetails.postDescription}
               onChange={(e) =>
@@ -172,93 +177,127 @@ export default function CommunityPosts() {
 
             <div className="d-flex w-100 justify-content-end mt-4">
               <Button type="primary" onClick={() => addPost()}>
-                Add Post
+              {t("add_post")}
               </Button>
             </div>
           </Card>
-        )}
+        
         <Card bordered={false} className="criclebox h-full">
-          <div className="d-flex flex-column">
-            <div >
-              {userData.communityPosts.posts.map((post, index) => {
-                return (
-                  <div
-                 
-                    style={{
-                      cursor: "pointer",
-                      // backgroundColor:
-                      //   postSelectedIndex === index ? "red" : "white",
-                    
-                    }}
-                    onClick={() => {
-                      setPostSelectedIndex(index);
-                      setLoadMoreComments(true);
-                    }}
-                    key={"post" + index}
-                    className="col-lg-5 col-md-5 col-sm-12 appointment-card mt-1 mb-2 pt-2 ps-3 pe-3 w-100"
-                  >
-                    <div className="community-post-name"> {post.firstName + " " + post.lastName}</div>
-                    <div className="community-post-txt mt-2">Service: {post.postService}</div>
-                    <div className="community-post-txt mt-2 "> Description:{post.postDescription}</div>
-                    <div className="comment-count mt-2 d-flex justify-content-end">{post.commentCount} comments</div>
-                  </div>
-                );
-              })}
-              {userData.communityPosts.pageNumber !== -1 &&
-                userData.communityPosts.pageNumber <=
-                  userData.communityPosts.totalNumberOfPages && (
-                  <Button type="primary" onClick={() => setLoadMore(true)}>
-                    load
-                  </Button>
-                )}
+        <div className="d-flex flex-column">
+  {userData.communityPosts.posts.map((post, index) => {
+    return (
+      <div
+        style={{ cursor: "pointer" }}
+        onClick={() => {
+          setPostSelectedIndex(index);
+          setLoadMoreComments(true);
+        }}
+        key={"post" + index}
+        className="col-lg-5 col-md-5 col-sm-12 appointment-card mt-1 mb-2 pt-2 ps-3 pe-3 w-100"
+      >
+        <div className="d-flex align-items-center">
+          <Avatar.Group>
+            <Avatar
+              className="appointment-profile me-2"
+              size={50}
+              shape="circle"
+              src={
+                post?.profilePicture ? post?.profilePicture : avatar
+              }
+            />
+          </Avatar.Group>
+          <div className="txt">
+            {post.firstName + " " + post.lastName}
+          </div>
+        </div>
+        <div className="community-post-txt mt-2">
+          {t("service") + ":"} {post.postService}
+        </div>
+        <div className="community-post-txt mt-2 ">
+          {t("description") + ":"}
+          {post.postDescription}
+        </div>
+        <div className="comment-count mt-2 d-flex justify-content-end">
+          {post.commentCount} {t("comments")}
+        </div>
+
+        {/* Add comment section */}
+        {postSelectedIndex === index && (
+          <div>
+          
+            <div className="d-flex m-auto">
+              <textarea
+                className="patient-details-input w-100 mt-3"
+                type="text"
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                placeholder={t("add_comment") + "..."}
+              />
             </div>
-            {postSelectedIndex !== -1 && (
-              <div >
-                {userData.communityPosts.posts[
-                  postSelectedIndex
-                ].communityPostComments.comments.map((com) => {
-                  return (
-                    <div className="mt-3">
-                      <div className="community-post-name2" >{com.firstName + "" + com.lastName}</div>
-                     
-                      <div>{com.userEmail}</div>
-                      <div>{com.commentDescription}</div>
-                    </div>
-                    
-                  );
-                })}
-                <div className="d-flex m-auto">
-                  <textarea
-                  className="patient-details-input w-100"
-                    type="text"
-                    value={commentText}
-                    onChange={(e) => setCommentText(e.target.value)}
-                    placeholder="Add Comment..."
-                  />
+            <Button
+              type="primary"
+              onClick={() => addComment()}
+              className="me-3 mt-3"
+            >
+              {t("add_comment")}
+            </Button>
+            {/* <Button
+              type="primary"
+              onClick={() => setPostSelectedIndex(-1)}
+              className="me-3 mt-3"
+            >
+              {t("back")}
+            </Button> */}
+            {post.communityPostComments.comments.map((com) => {
+              return (
+                <div className="mt-3 d-flex align-items-center">
+                
+                     <Avatar.Group>
+            <Avatar
+              className="appointment-profile me-2"
+              size={50}
+              shape="circle"
+              src={
+               com?.profilePicture ? com?.profilePicture : avatar
+              }
+            />
+          </Avatar.Group>
+          <div className="d-flex  flex-column post-names ">
+                  <div className=" txt">
+                    {com.firstName + " " + com.lastName}
+                  </div>
                  
+                  <div className="">{com.commentDescription}</div>
                 </div>
-                <Button type="primary" onClick={() => addComment()} className="me-3 mt-3">
-                    Add comment
-                  </Button>
-                <Button type="primary" onClick={() => setPostSelectedIndex(-1)} className="me-3 mt-3">
-                  back
-                </Button>
-                {userData.communityPosts.posts[postSelectedIndex]
-                  .communityPostComments.pageNumber <=
-                  userData.communityPosts.posts[postSelectedIndex]
-                    .communityPostComments.totalNumberOfPages && (
-                  <Button
-                    type="primary"
-                    onClick={() => setLoadMoreComments(true)}
-                  >
-                    load
-                  </Button>
-                )}
-              </div>
+                </div>
+              );
+            })}
+            {post.communityPostComments.pageNumber <=
+              post.communityPostComments.totalNumberOfPages && (
+              <Button
+                type="primary"
+                onClick={() => setLoadMoreComments(true)}
+                className="mt-2"
+              >
+                {t("load")}
+              </Button>
             )}
           </div>
+        )}
+      </div>
+    );
+  })}
+  {userData.communityPosts.pageNumber !== -1 &&
+    userData.communityPosts.pageNumber <=
+      userData.communityPosts.totalNumberOfPages && (
+      <Button type="primary" onClick={() => setLoadMore(true)} className="w-30 m-auto">
+        {t("load")}
+      </Button>
+    )}
+</div>
         </Card>
       </Col>
     </Main>
+   
   );
 }

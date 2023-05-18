@@ -1,4 +1,4 @@
-import { Button, Card, Col, Descriptions, Layout, Row } from "antd";
+import { Button, Card, Col,  Layout, Row } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,18 +7,16 @@ import { SmileOutlined } from "@ant-design/icons";
 import { Result } from "antd";
 import { util } from "../public/util";
 import LayoutWrapper from "../components/Layout";
-import { Modal, ModalBody } from "react-bootstrap";
-import CancelIcon from "../icons/CancelIcon";
-import patientImg from "../assets/images/patient.png";
-import Main from "../components/layout/Main";
+import patientImg from "../assets/images/patientProfile.jpg";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 export default function PatientDetails() {
+  const [t, i18n] = useTranslation();
   const { state } = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const userData = useSelector((state) => state);
   const [completed, setCompleted] = useState(false);
-  const [patientModal, setPatientModal] = useState(false);
   const [medicalInformation, setMedicalInformation] = useState({
     height: "",
     weight: "",
@@ -71,24 +69,30 @@ export default function PatientDetails() {
    <LayoutWrapper  withFooter={true}>
         <Layout
         className="layout-default layout-signin"
-        style={{ padding: "200px" }}
+        
       >
        
-      <Row gutter={[24, 0]} justify="center">
+      <Row justify="center" 
+      className="d-flex align-items-center justify-content-center pb-150"  style={{position:"relative",top:"130px"}}>
       <Col xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }}>
-          <img src={patientImg} alt="" className="patient-image" />
+          <img src={patientImg} alt=""  style={{width:"500px"}}/>
         </Col>
         <Col span={24} md={8} className="mb-24 ">
           <Card
             bordered={false}
-            title={<div className="m-0 text-center all-txts">Patient Details</div>}
+            title={<div className="m-0 text-center all-txts">{t("patient_details")} </div>}
             className="header-solid h-full card-profile-information  "
             extra={<Button type="link">{}</Button>}
             bodyStyle={{ paddingTop: 0 }}
           >
-            <div className="d-flex flex-column" style={{gap:"20px"}}>
+              <div
+                    className="all-cards-info pe-2 "
+                    style={{ height: "400px", overflowY: "auto" }}
+                  >
+            <div className="d-flex flex-column 
+            " style={{gap:"20px"}}>
             <div className="all-txts" >
-              Height (cm)*{" "}
+            {t("height")+"(cm)*"}
             </div>
             <input
             className="patient-details-input"
@@ -97,11 +101,11 @@ export default function PatientDetails() {
                 updateMedicalInformation("height", parseInt(e.target.value))
               }
               value={medicalInformation.height}
-              placeholder="height"
+              placeholder={t("height")}
             />
             <div className="all-txts">
               {" "}
-              Weight (kg)*
+              {t("weight")+"(kg)*"} 
             </div>
             <input
               className="patient-details-input"
@@ -110,10 +114,10 @@ export default function PatientDetails() {
                 updateMedicalInformation("weight", parseInt(e.target.value))
               }
               value={medicalInformation.weight}
-              placeholder="weight"
+              placeholder={t("weight")} 
             />
             <div className="all-txts">
-              Diseases*
+            {t("diseases")+"*"} 
             </div>
             <input
               className="patient-details-input"
@@ -122,10 +126,10 @@ export default function PatientDetails() {
                 updateMedicalInformation("diseasesDescription", e.target.value)
               }
               value={medicalInformation.diseasesDescription}
-              placeholder="diseasesDescription"
+              placeholder={t("diseases")}
             />
             <div className="all-txts">
-              Vaccination*
+            {t("vaccination")+"*"}
             </div>
             <input
               className="patient-details-input"
@@ -137,11 +141,12 @@ export default function PatientDetails() {
                 )
               }
               value={medicalInformation.vaccinationDescription}
-              placeholder="vaccinationDescription"
+              placeholder={t("vaccination")}
             />
             <Button type="primary" onClick={() => addMedicalInformation()}>
-              Update
+            {t("update")}
             </Button>
+            </div>
             </div>
           </Card>
         </Col>
@@ -158,7 +163,7 @@ export default function PatientDetails() {
   >
     <Result
       icon={<SmileOutlined />}
-      title="Great, we have done all the operations!"
+      title= {t("great")}
       extra={
         <Button
           onClick={() => {
@@ -170,7 +175,7 @@ export default function PatientDetails() {
           }}
           type="primary"
         >
-          Next
+        {t("next")}
         </Button>
       }
     />

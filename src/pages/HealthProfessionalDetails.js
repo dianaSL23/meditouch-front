@@ -1,5 +1,5 @@
 import { DeleteOutlined, SmileOutlined } from "@ant-design/icons";
-import { Button, Card, Col, Descriptions, Layout, Result, Row } from "antd";
+import { Button, Card, Col, Layout, Result, Row } from "antd";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -8,9 +8,11 @@ import LayoutWrapper from "../components/Layout";
 import { businessAccountController } from "../controllers/businessAccountController";
 import { userController } from "../controllers/userController";
 import { util } from "../public/util";
-import doctorImg from "../assets/images/doctorImg.jpg";
+import img from "../assets/images/profile.avif";
 import { toast } from "react-toastify";
+import { useTranslation } from "react-i18next";
 export default function HealthProfessionalDetails() {
+  const [t, i18n] = useTranslation();
   const [specialities, setSpecialities] = useState([]);
   const [dataLoaded, setDataLoaded] = useState(false);
   const [completed, setCompleted] = useState(false);
@@ -113,7 +115,6 @@ export default function HealthProfessionalDetails() {
             };
           });
       } else {
-       
         toast.warning("Sorry Not available!", {
           position: "top-center",
           autoClose: 5000,
@@ -253,18 +254,22 @@ export default function HealthProfessionalDetails() {
     <AuthenticationWrapper>
       {!completed ? (
         <LayoutWrapper withFooter={true}>
-          <Layout
-            className="layout-default layout-signin"
-            style={{ padding: "150px" }}
-          >
-            <Row gutter={[24, 0]} justify="center">
-              <Col span={24} md={15} className="mb-24">
+          <Layout className="layout-default layout-signin">
+            <Row
+              justify="center"
+              className="d-flex align-items-center justify-content-center pb-150"
+              style={{ position: "relative", top: "130px" }}
+            >
+              <Col xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }}>
+                <img src={img} alt="" className="signup-image" />
+              </Col>
+              <Col span={24} md={8}>
                 <Card
                   bordered={false}
                   title={
-                    <div className="m-0 text-center all-txts">
+                    <div className="m-0 text-center txt-txt">
                       {" "}
-                      Health Professional Details
+                      {t("Health_Professional_Details")}
                     </div>
                   }
                   className="header-solid h-full card-profile-information "
@@ -273,10 +278,10 @@ export default function HealthProfessionalDetails() {
                 >
                   <div
                     className="all-cards-info pe-2 "
-                    style={{ height: "600px", overflowY: "auto" }}
+                    style={{ height: "400px", overflowY: "auto" }}
                   >
                     <div className="d-flex flex-column" style={{ gap: "10px" }}>
-                      <div className="all-txts">Speciality*</div>
+                      <div className="all-txts"> {t("Speciality") + "*"}</div>
                       <select
                         className="patient-details-input"
                         style={{ border: "none !important" }}
@@ -295,21 +300,24 @@ export default function HealthProfessionalDetails() {
                           );
                         })}
                       </select>
-                      <div className="all-txts">clinicLocation*</div>
+                      <div className="all-txts">
+                        {" "}
+                        {t("clinic_location") + "*"}
+                      </div>
                       <input
                         className="patient-details-input"
                         type="text"
                         value={userForm.clinicLocation}
-                        placeholder="clinicLocation"
+                        placeholder={t("clinic_location")}
                         onChange={(e) =>
                           updateForm("clinicLocation", e.target.value)
                         }
                       />
-                      <div className="all-txts">Biography</div>
+                      <div className="all-txts">{t("Biography")}</div>
                       <input
                         className="patient-details-input"
                         type="text"
-                        placeholder="biography"
+                        placeholder={t("Biography")}
                         value={userForm.biography}
                         onChange={(e) =>
                           updateForm("biography", e.target.value)
@@ -318,9 +326,11 @@ export default function HealthProfessionalDetails() {
                       <div>
                         {locationEnabled ? (
                           <div className="all-txts">
-                            Are you in your clinic now?
+                            {t("clinic_now")}
                             <div className="d-flex">
-                              <div className="all-txts me-2 mt-3">Yes</div>
+                              <div className="all-txts me-2 mt-3">
+                                {t("yes")}
+                              </div>
                               <input
                                 className="me-2 mt-3"
                                 type="radio"
@@ -328,7 +338,9 @@ export default function HealthProfessionalDetails() {
                                 onClick={(e) => setMyClinicLocation(true)}
                                 checked={myClinicLocation}
                               />
-                              <div className="all-txts me-2 mt-3">No</div>
+                              <div className="all-txts me-2 mt-3">
+                                {t("no")}
+                              </div>
                               <input
                                 className="me-2 mt-3"
                                 type="radio"
@@ -344,7 +356,7 @@ export default function HealthProfessionalDetails() {
                       </div>
 
                       <Button type="primary" onClick={() => addService()}>
-                        Add service
+                        {t("add_service")}
                       </Button>
                       {userForm.services.map((service, index) => {
                         return (
@@ -353,7 +365,8 @@ export default function HealthProfessionalDetails() {
                               <div className="d-flex align-items-center mt-3 mb-3">
                                 <div className="me-3 all-txts">
                                   {" "}
-                                  Service {index + 1}
+                                  {t("service")}
+                                  {index + 1}
                                 </div>
                                 {userForm.services.filter(
                                   (s) => s.isDeleted === false
@@ -370,12 +383,14 @@ export default function HealthProfessionalDetails() {
                                 className="d-flex flex-column"
                                 style={{ gap: "10px" }}
                               >
-                                <div className="all-txts">Service Name</div>
+                                <div className="all-txts">
+                                  {t("service_name")}
+                                </div>
                                 <input
                                   className="patient-details-input"
                                   type="text"
                                   value={service.serviceName}
-                                  placeholder="service name"
+                                  placeholder={t("service_name")}
                                   onChange={(e) =>
                                     updateService(
                                       index,
@@ -384,12 +399,12 @@ export default function HealthProfessionalDetails() {
                                     )
                                   }
                                 />
-                                <div className="all-txts">Price</div>
+                                <div className="all-txts">{t("price")}</div>
                                 <input
                                   className="patient-details-input"
                                   type="number"
                                   value={service.servicePrice}
-                                  placeholder="price"
+                                  placeholder={t("price")}
                                   onChange={(e) =>
                                     updateService(
                                       index,
@@ -398,7 +413,7 @@ export default function HealthProfessionalDetails() {
                                     )
                                   }
                                 />
-                                <div className="all-txts">Currency</div>
+                                <div className="all-txts">{t("currency")}</div>
                                 <select
                                   className="patient-details-input"
                                   defaultValue={-1}
@@ -411,9 +426,11 @@ export default function HealthProfessionalDetails() {
                                     )
                                   }
                                 >
-                                  <option value={-1}>All Currencies</option>
-                                  <option value={"USD"}>USD</option>
-                                  <option value={"LBP"}>LBP</option>
+                                  <option value={-1}>
+                                    {t("all_currenices")}
+                                  </option>
+                                  <option value={"USD"}>{t("usd")}</option>
+                                  <option value={"LBP"}>{t("lbp")}</option>
                                 </select>
                               </div>
                             </div>
@@ -421,7 +438,7 @@ export default function HealthProfessionalDetails() {
                         );
                       })}
                       <Button type="primary" onClick={() => submit()}>
-                        Continue
+                        {t("continue")}
                       </Button>
                     </div>
                   </div>
@@ -438,13 +455,10 @@ export default function HealthProfessionalDetails() {
           >
             <Result
               icon={<SmileOutlined />}
-              title={
-                "Great, we have done all the operations!." +
-                (util.isUserAuthorized() ? "" : " Wait admin approval")
-              }
+              title={t("great") + (util.isUserAuthorized() ? "" : t("wait"))}
               extra={
                 <Button onClick={() => navigate("/dashboard")} type="primary">
-                  Next
+                  {t("next")}
                 </Button>
               }
             />

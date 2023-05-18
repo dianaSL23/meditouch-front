@@ -1,18 +1,18 @@
 import { useEffect, useState } from "react";
 
-import { Button, Card, Col, Row, Typography } from "antd";
+import { Button, Card, Col, Empty, Row, Spin, Typography } from "antd";
 
 import Main from "../components/layout/Main";
-import { businessAccountController } from "../controllers/businessAccountController";
 import { useDispatch, useSelector } from "react-redux";
 import { userController } from "../controllers/userController";
+import { useTranslation } from "react-i18next";
 
 export default function ReservationSlots() {
+  const [t, i18n] = useTranslation();
   const userData = useSelector((state) => state);
   const dispatch = useDispatch();
-  const { Title, Text } = Typography;
+  const { Title } = Typography;
   const [loading, setLoading] = useState(false);
-  const [reservationSlotsData, setResrvationSlotsData] = useState([]);
   useEffect(() => {
     if (!userData.loadingApp && !userData.myReservedSlots.loaded) {
       setLoading(true);
@@ -22,7 +22,6 @@ export default function ReservationSlots() {
           userId: userData.userInfo.userId,
         })
         .then((response) => {
-          setResrvationSlotsData(response.data.reservations);
           dispatch({
             type: "SET_MY_RESERVED_SLOTS",
             myReservedSlots: {
@@ -52,30 +51,30 @@ export default function ReservationSlots() {
           <Col xs={24} sm={24} md={24} lg={24} xl={24} className="mb-24">
             <Card bordered={false} className="criclebox cardbody ">
               <div className="project-ant">
-                <div>
-                  <Title level={5}>Reservation Slots</Title>
-                </div>
+               
               </div>
               {loading ? (
-                "loading..."
-              ) : userData.myReservedSlots.slots.length === 0 ? (
-                "no data"
-              ) : (
+            <Spin tip="Loading" size="large">
+              <div className="content" />
+            </Spin>
+          ) : !loading && userData.myReservedSlots.slots.length === 0 ? (
+            <Empty />
+          )  : (
                 <div className="ant-list-box table-responsive">
                   <table className="width-100">
                     <thead>
                       <tr>
-                        <th>DOCTOR NAME</th>
-                        <th>DOCTOR EMAIL</th>
-                        <th>DOCTOR SPECIALITY</th>
-                        <th>ACTION</th>
+                        <th>{t("doctor_name")}</th>
+                        <th>{t("doctor_email")}</th>
+                        <th>{t("doctor_speciality")}</th>
+                        <th>{t("action")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {userData.myReservedSlots.slots?.map((ap, index) => (
                         <tr key={index}>
-                          <td>
-                            <h6>{ap.firstName + " " + ap.lastName}</h6>
+                          <td className="ps-4">
+                           {ap.firstName + " " + ap.lastName}
                           </td>
                           <td>{ap.userEmail}</td>
                           <td>{ap.specialityName}</td>
@@ -85,7 +84,7 @@ export default function ReservationSlots() {
                                 onClick={() => deleteReservation(index)}
                                 danger
                               >
-                                Delete Reservation
+                               {t("delete_reservation")}
                               </Button>
                             </span>
                           </td>

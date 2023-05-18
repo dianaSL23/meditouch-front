@@ -1,4 +1,4 @@
-import { Row, Col, Card, Button, Select, Tag, Modal } from "antd";
+import { Row, Col, Card, Button, Select, Tag, Modal, Avatar } from "antd";
 
 import "../assets/styles/appointments.css";
 
@@ -16,8 +16,10 @@ import moment from "moment";
 import classNames from "classnames";
 import Lock from "../icons/lock";
 import { toast } from "react-toastify";
-
+import { useTranslation } from "react-i18next";
+import img from "../assets/images/healthcare.png";
 function Appointments() {
+  const [t, i18n] = useTranslation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [totalNumberOfPages, setTotalNumberOfPages] = useState(1);
@@ -111,6 +113,7 @@ function Appointments() {
       setSlots(tempSchedule);
     }
   }, [dayChosen]);
+  console.log(userData.myAppointments)
   useEffect(() => {
     if (!scheduleModal) {
       setDayChosen(-1);
@@ -255,14 +258,14 @@ function Appointments() {
               disabled={slotIndexChosen === -1}
               onClick={() => postponeAppointment()}
             >
-              Postpone Appointment
+              {t("postpone_appointment")}
             </Button>
           </div>
         </div>
       )}
     </Modal>
   );
- 
+
   function acceptAppointment(i) {
     let newData = [...upcomingAppointments];
     userController
@@ -584,15 +587,15 @@ function Appointments() {
       });
   }
 
-  const getAppPrescriptions=(id)=>{
+  const getAppPrescriptions = (id) => {
     businessAccountController
-    .getAppointmentPrescription({
-      appointmentId:id,
-    })
-    .then((response) => {
-      setPrescriptionData(response.data);
-    });
-  }
+      .getAppointmentPrescription({
+        appointmentId: id,
+      })
+      .then((response) => {
+        setPrescriptionData(response.data);
+      });
+  };
   const modal2 = (
     <Modal
       open={prescriptionModal}
@@ -607,21 +610,77 @@ function Appointments() {
         hidden: true,
       }}
     >
-      <div>Appointment Prescription : {prescriptionData.result?.prescriptionDescription}</div>
+      <div>
+        {t("appointment_prescription") + ":"}{" "}
+        {prescriptionData.result?.prescriptionDescription}
+      </div>
     </Modal>
   );
-  console.log(prescriptionData)
+  console.log(prescriptionData);
+  const modal3 = (
+    <Modal
+    width={600}
+      open={prescriptionModal}
+      onOk={handlePrescriptionOk}
+      onCancel={handlePrescriptionCancel}
+      okButtonProps={{
+        disabled: false,
+        hidden: false,
+      }}
+      cancelButtonProps={{
+        disabled: true,
+        hidden: true,
+      }}
+    >
+      <div
+        className="d-flex align-items-center appointment-pres-wrapper 
+      justify-content-center"
+        style={{ gap: "20px" }}
+      >
+        <div>
+          <img src={img} alt="" />
+        </div>
+
+        <div className="d-flex flex-column justify-content-center pe-4">
+          <div className="all-txts4  " style={{ fontSize: "18px" }}>
+            MediTouch
+          </div>
+          <div className="all-txts3">Your healthcare is our responsibility</div>
+        </div>
+      </div>
+      <div
+        className="d-flex mt-4 justify-content-start"
+        style={{ gap: "20px" }}
+      >
+        <div className="d-flex ">
+        <div className="all-txts1">
+          Name:
+        </div>
+        <div className="all-txts1 ms-2" style={{borderBottom:"5px dotted rgb(219, 216, 216)"}}>
+          {userData.userInfo?.firstName + " " + userData.userInfo?.lastName}
+        </div>
+        </div>
+       
+      </div>
+      <div className="all-txts1 mt-4 p-3 prescription-info">
+        {prescriptionData.result?.prescriptionDescription}
+      </div>
+    </Modal>
+  );
   return (
     <Main>
       {modal}
       {modal2}
+      {modal3}
       <div className="tabled">
-        <Row gutter={[24, 0]}>
+      <Row gutter={[24, 0]}>
+
+      
           <Col xs={24} md={24} sm={24} lg={24} xl={24}>
             <Card
               bordered={false}
               className="criclebox tablespace mb-24"
-              title="All Appointments"
+              title={t("all_appointments")}
               extra={
                 <Select
                   mode="multiple"
@@ -643,28 +702,42 @@ function Appointments() {
                     >
                       <div className="d-flex flex-column ">
                         <div
-                          className="d-flex align-items-center"
+                          className="d-flex align-items-center "
                           style={{
                             borderBottom: "1px solid rgb(219, 216, 216)",
                           }}
                         >
-                          <div className="appointment-profile">
-                            <img src={avatar} className="" alt="" />
+                          <div className="me-2">
+                            <Avatar.Group>
+                              <Avatar
+                                className="appointment-profile"
+                                size={50}
+                                shape="circle"
+                                src={
+                                 ap?.profilePicture
+                                    ? ap?.profilePicture
+                                    : avatar
+                                }
+                              />
+                            </Avatar.Group>
                           </div>
                           <div className="d-flex flex-column justify-content-center all-txts1">
                             {ap.firstName + " " + ap.lastName}
                             {/* <div> {ap.serviceName}</div> */}
-                            <div className="appointment-status ">
+                            <div className="appointment-status">
                               {ap.appointmentStatus}
                             </div>
                           </div>
                         </div>
                         <div className="d-flex align-items-center mb-2 mt-2">
-                          <div className="all-txts me-2">Service Name :</div>
-                          <div className="all-txts1">{ap.serviceName}</div>
+                          <div className="services-txt1 me-2">
+                            {" "}
+                            {t("service_name") + ":"}
+                          </div>
+                          <div className="services-txt1">{ap.serviceName}</div>
                         </div>
                         <div className="d-flex justify-content-between w-100 mb-2 ">
-                          <div className="d-flex align-items-center appointment-datetime all-txts1 ">
+                          <div className="d-flex align-items-center appointment-datetime services-txt1 ">
                             <div className="me-2">
                               {" "}
                               <Calendar />
@@ -679,7 +752,7 @@ function Appointments() {
                         {ap.isCancelled ? (
                           <div className="d-flex  w-100 justify-content-center">
                             <Button type="primary" disabled className="w-100">
-                              Cancelled
+                              {t("cancelled")}
                             </Button>
                           </div>
                         ) : userData.userInfo?.userRole !== "PATIENT" ? (
@@ -691,23 +764,23 @@ function Appointments() {
                                   className="w-50"
                                   onClick={() => acceptAppointment(index)}
                                 >
-                                  Accept
+                                  {t("accept")}
                                 </Button>
                                 <Button
                                   className="w-50 mx-2"
                                   danger
                                   onClick={() => rejectAppointment(index)}
                                 >
-                                  Reject
+                                  {t("reject")}
                                 </Button>
                               </div>
                             ) : ap.appointmentStatus === "ACCEPTED" ? (
                               <Button type="primary" disabled className="w-100">
-                                Accepted
+                                {t("accepted")}
                               </Button>
                             ) : (
                               <Button danger className="w-100">
-                                Rejected
+                                {t("rejected")}
                               </Button>
                             )}
                             {ap.appointmentActualEndTime !== undefined &&
@@ -723,17 +796,16 @@ function Appointments() {
                                     });
                                   }}
                                 >
-                                  Refer Doctor
+                                  {t("refer_doctor")}
                                 </Button>
                               )}
                           </div>
                         ) : userData.userInfo?.userRole === "PATIENT" ? (
-                          moment(ap.slotStartTime).isBefore(
-                            moment(new Date())
-                          ) &&
+                          moment(ap.slotStartTime).isBefore(moment()) &&
                           ap.appointmentActualStartTime === undefined &&
-                          ap.appointmentActualEndTime === undefined ? (
-                            "You did not attend the appointment"
+                          ap.appointmentActualEndTime === undefined && 
+                          ap.appointmentStatus !== "PENDING"? (
+                            t("did_not_attend")
                           ) : ap.appointmentActualStartTime === undefined &&
                             ap.appointmentActualEndTime === undefined &&
                             moment(ap.slotStartTime).isAfter(
@@ -752,7 +824,7 @@ function Appointments() {
                                     setScheduleModal(true);
                                   }}
                                 >
-                                  Postpone Appointment
+                                  {t("postpone_appointment")}
                                 </Button>
                                 <Button
                                   type="primary"
@@ -761,7 +833,7 @@ function Appointments() {
                                     cancelAppointment(index);
                                   }}
                                 >
-                                  Cancel Appointment
+                                  {t("cancel_appointment")}
                                 </Button>
                               </div>
                             )
@@ -778,9 +850,12 @@ function Appointments() {
                           ) : (
                             <Button
                               type="primary"
-                              onClick={() => {setPrescriptionModal(true);getAppPrescriptions(ap.appointmentId)}}
+                              onClick={() => {
+                                setPrescriptionModal(true);
+                                getAppPrescriptions(ap.appointmentId);
+                              }}
                             >
-                              View Prescription
+                              {t("view_prescription")}
                             </Button>
                           )
                         ) : (
@@ -798,7 +873,7 @@ function Appointments() {
                       lineHeight: "32px",
                     }}
                   >
-                    <Button>no data</Button>
+                    <Button>{t("no_data")}</Button>
                   </div>
                 )}
                 {loading && (
@@ -814,7 +889,7 @@ function Appointments() {
                       loading={loading}
                       onClick={() => setPageNumber(pageNumber + 1)}
                     >
-                      loading
+                      {t("loading")}
                     </Button>
                   </div>
                 )}
@@ -828,7 +903,7 @@ function Appointments() {
                     }}
                   >
                     <Button onClick={() => setPageNumber(pageNumber + 1)}>
-                      Load More
+                      {t("load_more")}
                     </Button>
                   </div>
                 )}

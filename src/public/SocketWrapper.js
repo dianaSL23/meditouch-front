@@ -198,7 +198,7 @@ export const SocketWrapperProvider = ({ ...props }) => {
           );
           newNotification.notificationText = outputString;
 
-          let allNotifications = [newNotification, ...notifications.current];
+          let allNotifications = [newNotification, ...notifications.current.notifications];
           dispatch({
             type: "SET_MY_NOTIFICATIONS",
             notifications: {

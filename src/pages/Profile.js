@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 import {
@@ -6,32 +5,17 @@ import {
   Col,
   Card,
   Button,
-  List,
+  
   Descriptions,
   Avatar,
-  Radio,
   Switch,
-  Upload,
-  message,
+ 
 } from "antd";
 
-import {
-  FacebookOutlined,
-  TwitterOutlined,
-  InstagramOutlined,
-  VerticalAlignTopOutlined,
-} from "@ant-design/icons";
 
-import BgProfile from "../assets/images/doctorProfile.jpg";
-import profilavatar from "../assets/images/face-1.jpg";
-import convesionImg from "../assets/images/face-3.jpg";
-import convesionImg2 from "../assets/images/face-4.jpg";
-import convesionImg3 from "../assets/images/face-5.jpeg";
-import convesionImg4 from "../assets/images/face-6.jpeg";
-import convesionImg5 from "../assets/images/face-2.jpg";
-import project1 from "../assets/images/home-decor-1.jpeg";
-import project2 from "../assets/images/home-decor-2.jpeg";
-import project3 from "../assets/images/home-decor-3.jpeg";
+
+import BgProfile from "../assets/images/bgDoctor.PNG";
+
 import Main from "../components/layout/Main";
 import avatar from "../assets/images/avatar.jpg";
 import { UploadOutlined } from "@ant-design/icons";
@@ -39,8 +23,10 @@ import { businessAccountController } from "../controllers/businessAccountControl
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { userController } from "../controllers/userController";
+import { useTranslation } from "react-i18next";
 function Profile() {
   const dispatch = useDispatch();
+  const [t, i18n] = useTranslation();
   const userData = useSelector((state) => state);
   const navigate = useNavigate();
   async function upload(file) {
@@ -181,24 +167,27 @@ function Profile() {
                   <Button
                     style={{ position: "absolute", left: 0, top: 0, zIndex: 0 }}
                     icon={<UploadOutlined />}
+                    className="d-flex align-items-center "
                   >
-                    Upload
+                      {t("upload")}
                   </Button>
                 </div>
                 {userData.userInfo &&
                   userData.userInfo?.profilePicture !== "" &&
                   userData.userInfo.profilePicture !== -1 && (
-                    <Button onClick={() => deletepic()}>DELETE</Button>
+                    <Button onClick={() => deletepic()}  className="ms-3 me-1">   {t("delete")}</Button>
                   )}
                 {userData.userInfo &&
                   userData.userInfo.businessAccountInfo !== -1 &&
                   userData.userInfo.businessAccountInfo !== -2 && (
                     <Button
+                
                       onClick={() => navigate("/hp-details")}
                       type="primary"
+                      className="ms-2 d-flex align-items-center"
                       icon={<UploadOutlined />}
                     >
-                      Edit Profile
+                         {t("edit_profile")}
                     </Button>
                   )}
               </div>
@@ -208,10 +197,10 @@ function Profile() {
       ></Card>
 
       <Row gutter={[24, 0]} justify="center">
-        <Col span={24} md={8} className="mb-24">
+        <Col xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }} className="mb-24">
           <Card
             bordered={false}
-            title={<h6 className="font-semibold m-0">Profile Information</h6>}
+            title={<h6 className="font-semibold m-0">{t("profile_info")}</h6>}
             className="header-solid h-full card-profile-information"
             extra={<Button type="link">{}</Button>}
             bodyStyle={{ paddingTop: 0, paddingBottom: 16 }}
@@ -221,30 +210,35 @@ function Profile() {
             </p>
             <hr className="my-25" />
             <Descriptions title="">
-              <Descriptions.Item label="Full Name" span={3}>
+              <Descriptions.Item label= {t("full_name")} span={3}>
                 {userData.userInfo?.firstName +
                   " " +
                   userData.userInfo?.lastName}
               </Descriptions.Item>
 
-              <Descriptions.Item label="Email" span={3}>
+              <Descriptions.Item label= {t("email")} span={3}>
                 {userData.userInfo?.userEmail}
               </Descriptions.Item>
-              <Descriptions.Item label="Clinic Location" span={3}>
+              <Descriptions.Item label= {t("clinic_location")}span={3}>
                 {userData.businessAccountInfo?.clinicLocation}
               </Descriptions.Item>
             </Descriptions>
           </Card>
         </Col>
-        <Col span={24} md={8} className="mb-24 ">
+        <Col   xs={{ span: 24 }} lg={{ span: 12 }} md={{ span: 12 }}
+               className="mb-24 ">
           <Card
+           
+           
             bordered={false}
-            className="header-solid h-full"
-            title={<h6 className="font-semibold m-0">User Notifications</h6>}
+            className="header-solid h-full "
+            title={<h6 className="font-semibold m-0">{t("User_Notifications")}</h6>}
           >
             <ul className="list settings-list">
-              <li>
-                <h6 className="list-header text-sm text-muted">ACCOUNT</h6>
+            <li>
+                <h6 className="list-header text-sm text-muted m-0">
+                {t("account")}
+                </h6>
               </li>
               <li className="d-flex align-items-center">
                 <Switch
@@ -256,25 +250,25 @@ function Profile() {
                   }
                 />
 
-                <span>Notify when someone takes appointment from me</span>
+                <span>{t("user_notification_1")}</span>
               </li>
               <li className="d-flex align-items-center">
                 <Switch
                   onChange={(e) => updateNotificationsSettings("onReferral", e)}
                   checked={userData.notificationSettings.onReferral}
                 />
-                <span>Notify me when someone refers me</span>
+                <span>{t("user_notification_2")}</span>
               </li>
               <li className="d-flex align-items-center">
                 <Switch
                   onChange={(e) => updateNotificationsSettings("onFavorite", e)}
                   checked={userData.notificationSettings.onFavorite}
                 />
-                <span>Notify me when someone added me to his favorites</span>
+                <span>{t("user_notification_3")}</span>
               </li>
               <li>
                 <h6 className="list-header text-sm text-muted m-0">
-                  APPLICATION
+                {t("application")}
                 </h6>
               </li>
 
@@ -285,12 +279,12 @@ function Profile() {
                   }
                   checked={userData.notificationSettings.onAddFeatureEmail}
                 />
-                <span>New Feature Email</span>
+                <span>{t("user_notification_4")}</span>
               </li>
 
               <li>
                 <h6 className="list-header text-sm text-muted m-0">
-                  REMINDERS
+                {t("reminders")}
                 </h6>
               </li>
               <li>
@@ -300,7 +294,7 @@ function Profile() {
                   }
                   checked={userData.notificationSettings.onScheduleReminder}
                 />
-                <span>Remind me to set my schedule</span>
+                <span>{t("user_notification_5")}</span>
               </li>
             </ul>
           </Card>

@@ -10,36 +10,42 @@
   font-weight: 500;
 }
 .global-search-card-schedule-days {
-  border: 1px solid black;
-  border-radius: 50%;
+  border-radius: 5px;
   width: 30px;
   height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  background: rgba(92, 96, 113, 0.2);
+  font-family: Poppins;
+  font-style: normal;
+  font-weight: 500;
+  font-size: 14px;
+  line-height: 21px;
+  letter-spacing: 0.400465px;
+  color: #fff;
+
 }
 .global-search-card-schedule-days.global-search-card-selected-schedule-days {
-  background-color:#1890ff;
+  background-color: #1890ff;
   color: white;
   cursor: pointer;
 }
-.global-search-card-schedule-all-slots{
-  height: 150px;
-  overflow-y: auto;
-}
+
+
 .global-search-card-schedule-slots {
   width: 100px;
   font-size: 14px;
   height: 30px;
-  border: 1px solid black;
+  border: 1px solid rgb(173, 171, 171);
   cursor: pointer;
   opacity: 1;
   display: flex;
+
   justify-content: center;
- 
 }
-.global-search-card-disabled-schedule-slot{
+.global-search-card-disabled-schedule-slot {
   opacity: 0.3;
   text-decoration: line-through;
 }
@@ -47,7 +53,7 @@
 .global-search-card-schedule-slots.global-search-card-reserved-schedule-slot {
   opacity: 0.5;
 }
-.global-search-card-schedule-slots.global-search-card-reserved-schedule-slot.global-search-card-can-reserve-schedule-slot{
+.global-search-card-schedule-slots.global-search-card-reserved-schedule-slot.global-search-card-can-reserve-schedule-slot {
   background-color: #8c8c8c;
   color: white;
   opacity: 1;
@@ -56,5 +62,39 @@
 .global-search-card-schedule-slots.global-search-card-selected-schedule-slot {
   background-color: #1890ff;
   color: white;
+}
+.global-search-card-schedule-all-slots {
+  height: 150px;
+  overflow-y: auto;
 
+}
+.global-search-card-schedule-all-slots::-webkit-scrollbar {
+  background: rgba(92, 96, 113, 0.2);
+  width: 7px;
+
+}
+.global-search-card-schedule-all-slots::-webkit-scrollbar-thumb {
+  background: #4aa3f6;
+  border-radius: 4px;
+  opacity: 0.5;
+}
+/* .global-search-card-schedule-all-slots::-webkit-scrollbar {
+  width: 6px;
+}
+
+.global-search-card-schedule-all-slots::-webkit-scrollbar-track {
+  background-color: #f5f5f5;
+}
+
+.global-search-card-schedule-all-slots::-webkit-scrollbar-thumb {
+  background-color: #b1d7fb;
+  border-radius: 10px;
+} */
+@media screen and (max-width: 992px) {
+ 
+  .slots-time{
+   margin-left:10px;
+   margin-top:5px;
+  }
+  
 }
